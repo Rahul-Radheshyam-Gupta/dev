@@ -17,4 +17,4 @@ migrations
 .idea/**/usage.statistics.xml
 .idea/**/dictionaries
 .idea/**/shelf
-
+*.xml
