@@ -1,0 +1,186 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block sub_content %}
+    <style>
+        .question-stats {
+            font-size: 1rem;
+            margin: 1% 0% 0% 1%;
+        }
+
+        @media only screen and (max-width: 1000px) {
+            .question-stats {
+                font-size: 0.8rem;
+                margin: 1% 0% 0% 1%;
+            }
+        }
+       .vote-btn{
+            background-color: #fbffe9;
+        }
+        .vote-btn:hover{
+            background-color: #ced4da;
+            color: #1a1e21;
+        }
+        .list-group-item-action:hover{
+            background-color: #e9ecef!important;
+        }
+
+        .pull-right {
+            float: right !important;
+        }
+    </style>
+    <div class="content thing">
+        <div class="flex-shrink-0 p-3 bg-white">
+            <ul class="list-unstyled ps-0 px-2" id="question_list">
+
+            </ul>
+        </div>
+    </div>
+    <div class="w-100">
+        <span role="button" class="badge bg-purple text-white mt-2 mb-2 me-4 comment-box-btn"
+              style="float: right; border-bottom: 1px solid gray"
+              onclick="hideShowTextChange($(this))"
+              aria-expanded="false">
+            Show Comment Box
+        </span>
+
+        <div class="mt-2 collapse" id="answer_div">
+            <form method="post" class="mx-3 mt-3">
+                <input id="answer_id" class="hidden" name="answer_id" value="">
+                {% csrf_token %}
+                <div id="answer_editor" style="min-height: 100px!important;"></div>
+                <div style="float: right; margin:10px 10px 10px 0;">
+                    <button class="btn btn-primary" type="button" id="submitCommentBtn">Add</button>
+                    <button id="cancel" class="btn btn-danger" type="button" onclick="resetCommentForm();">Reset
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <h6 class="ms-3 mt-2"> All Answers</h6>
+    <div class="ms-2 me-2">
+        <div class="d-flex flex-column align-items-stretch flex-shrink-0 bg-white w-100">
+            <hr>
+            <div class="list-group list-group-flush border-bottom answer-list-div scrollarea">
+                {# Answer List Will be append through ajax call #}
+            </div>
+        </div>
+    </div>
+
+
+    {% include 'core/common_question_html.html' %}
+{% endblock sub_content %}
+
+{% block script %}
+    <script>
+        let answer_parent_div_for_edit = null;
+        const hideShowTextChange = (current_selector) => {
+            let status = current_selector.text();
+            if ('Hide Comment Box' === status){
+                $('#answer_div').hide();
+            }
+            else{
+                $('#answer_div').show();
+            }
+            let new_status = status === 'Hide Comment Box' ? 'Show Comment Box' : 'Hide Comment Box';
+            current_selector.text(new_status);
+        }
+        setCategory()
+        console.log("base url ", base_url)
+        question_id = '{{ request.GET.question_id }}'
+        let answer_id_from_url = '';
+        if ('{{ request.GET.answer_id }}'){
+            answer_id_from_url = '{{ request.GET.answer_id }}';
+        }
+        if (question_id) {
+            getQuestions(question_id)
+        }
+
+
+        var toolbarOptions = [
+            [{'header': [1, 2, 3, 4, 5, 6, false]}],
+            ['bold', 'italic', 'underline', 'link'],        // toggled buttons
+            [{'script': 'sub'}, {'script': 'super'}],      // superscript/subscript
+            [{'color': []}, {'background': []}],          // dropdown with defaults from theme
+            [{'align': []}],
+            ['blockquote', 'code-block'],
+            [{'list': 'ordered'}, {'list': 'bullet'}],
+            [{'indent': '-1'}, {'indent': '+1'}],          // outdent/indent
+            // ['image', 'video']
+        ];
+        var quill = new Quill('#answer_editor', {
+            modules: {
+                toolbar: toolbarOptions
+            },
+            placeholder: 'Write your answer here..',
+            theme: 'snow'  // or 'bubble'
+        });
+
+        $("#submitCommentBtn").click(function (e) {
+            let html_content = $('#answer_editor .ql-editor').html();
+            let question_id = '{{ request.GET.question_id }}';
+            let created_by = '{{ request.session.user_detail.id }}';
+
+            if (html_content && html_content === '<p><br></p>'){
+                toastr.error('Please write something.', 'Error', {timeOut: 3000, closeButton: true});
+                return false;
+            }
+            let answer_id = $('#answer_id').val();
+            let post_url = base_url+'dev/answer/';
+            let method = answer_id === '' ? 'POST' : 'PATCH';
+            let action = answer_id === '' ? 'add' : 'update';
+            post_url = answer_id === '' ? post_url : (post_url+answer_id+'/');
+            e.preventDefault();
+            console.log("html_content", html_content)
+            $.ajax({
+                url: post_url,
+                method: method,
+                data: {
+                    'question':question_id,
+                    'action':action,
+                    'answer_text': html_content,
+                    'X-CSRFToken': $('input[name=csrfmiddlewaretoken]').val(),
+                    'created_by': '{{ request.session.user_detail.id }}'
+                },
+                headers:headers,
+                success: function (data) {
+                    console.log("Successfully added a post", data)
+                    if (method === 'PATCH'){
+                        toastr.success('Successfully updated', 'Success', {timeOut: 5000, closeButton: true})
+                        answer_parent_div_for_edit.find('.ql-editor').html(data.answer_text)
+                    }
+                    else{
+                        toastr.success('Successfully added', 'Success', {timeOut: 5000, closeButton: true})
+                        answerChilDiv(data, $('.answer-list-div'))
+                    }
+                    resetCommentForm();
+                },
+                error: function (error) {
+                    toastr.error('Something went wrong, Please try later', 'Error', {timeOut: 5000, closeButton: true})
+                }
+            })
+
+        })
+
+        if (answer_id_from_url){
+            getAnswers(question_id, answer_id_from_url, highlight=true);
+        }
+        else{
+            getAnswers(question_id);
+        }
+
+        let scrollUp = (current_selector) => {
+             $(".infinite-scroller").animate({scrollTop: 0}, 1000);
+             let answer_id = current_selector.attr('data-answer-id');
+            let answer = getAnswers(question_id, answer_id)
+            answer_parent_div_for_edit = current_selector.parents('.list-group-item-action')
+            console.log("Answer id ", answer_id,answer_parent_div_for_edit, answer_parent_div_for_edit.html())
+        }
+        const resetCommentForm = ()=> {
+            $('#submitCommentBtn').text('Add')
+            $('#answer_id').val('');
+            $('#answer_editor .ql-editor').html('')
+            answer_parent_div_for_edit = null;
+        }
+    </script>
+{% endblock script %}

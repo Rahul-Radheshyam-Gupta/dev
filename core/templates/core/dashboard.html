@@ -1,0 +1,54 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block sub_content %}
+    <style>
+        .question-stats {
+            font-size: 1rem;
+            margin: 1% 0% 0% 1%;
+        }
+        @media only screen and (max-width: 1000px) {
+            .question-stats {
+                font-size: 0.8rem;
+                margin: 1% 0% 0% 1%;
+            }
+
+        }
+        .individual-question-div:hover{
+            background-color: #e9ecef!important;
+        }
+        .vote-btn:hover{
+            background-color: #ced4da;
+            color: #1a1e21;
+        }
+    </style>
+    <div class="content thing">
+        <div class="flex-shrink-0 p-3 bg-white">
+            <div class="filter">
+                <div class="input-group mb-3 h-50">
+                    <select class="form-control bg-white text-dark p-2 w-25" id="category">
+                        <option selected value="">All Topic</option>
+                    </select>
+                    <input type="text" id="search_key" class="form-control p-2 w-50" placeholder="Type a search key..">
+                    <span class="badge text-bg-primary border pt-2 pb-1 fs-6" role="button" tabindex="0" onclick="applyQuestionFilter();" >Apply</span>
+                </div>
+            </div>
+{#            {{ request.session.user_detail }}#}
+            <h6 class="my-1"> All Questions under Topic <span id="selected_topic"> All </span> </h6>
+            <ul class="list-unstyled ps-0 px-2" id="question_list">
+
+            </ul>
+        </div>
+    </div>
+
+    {% include 'core/common_question_html.html' %}
+{% endblock sub_content %}
+
+{% block script %}
+    <script>
+        setCategory()
+        console.log("base url ",base_url)
+
+        getQuestions()
+
+    </script>
+{% endblock script %}

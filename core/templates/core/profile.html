@@ -1,0 +1,293 @@
+{% extends 'core/base.html' %}
+{% load custom_template_filter %}
+{% load static %}
+{% block sub_content %}
+    <div>
+        <h6 class="p-3 pb-0 lead fw-bold"> Your Profile</h6>
+    </div>
+    <div class="px-4 py-2 text-center profile-pic-div">
+        <div style="background-color: #ced4da">
+            <i role="button" class="bi bi-pencil small float-end p-2 text-secondary" data-bs-toggle="modal" data-bs-target="#edit_profile_modal"> </i>
+            <img class="d-block mx-auto mb-3 p-3 rounded-circle" id="profileImage" src="{{ request.session.user_detail.image }}" alt="" width="120"
+                 height="120">
+        </div>
+        <h5>Rahul Gupta</h5>
+        <span class="mx-4 small description">{{ request.session.user_detail.description }}
+        </span>
+        <ul class="w-100 nav nav-pills mb-3 mt-2" id="pills-tab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="pills-home-tab" data-bs-toggle="pill" data-bs-target="#pills-home"
+                        type="button" role="tab" aria-controls="pills-home" aria-selected="true">Personal Detail
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile"
+                        type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Statics
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pills-contact-tab" data-bs-toggle="pill" data-bs-target="#pills-contact"
+                        type="button" role="tab" aria-controls="pills-contact" aria-selected="false">Other Details
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pills-disabled-tab" data-bs-toggle="pill" data-bs-target="#pills-disabled"
+                        type="button" role="tab" aria-controls="pills-disabled" aria-selected="false">Messages
+                </button>
+            </li>
+        </ul>
+        <div class="tab-content " style="min-height: 170px; width: 100%;" id="pills-tabContent">
+            <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
+                <div class="row mx-2">
+                    <div class="col-sm-12">
+                        <div class="card person-detail-card">
+                            <div class="card-body">
+                                <h5 class="card-title border-bottom pb-1">Your Profile Detail
+                                    <span role="button" class="float-end small text-secondary" data-bs-toggle="modal" data-bs-target="#personDetailModal"><i class="bi bi-pencil small"></i></span></h5>
+                                <div class="row mx-1">
+                                    <div class="col-md-6 col-sm-12 border-end mt-1">
+                                         <span class="float-start">First Name</span> <span class="float-end first_name">{{ request.session.user_detail.first_name }}</span><br>
+                                         <span class="float-start">Last Name</span> <span class="float-end last_name">{{ request.session.user_detail.last_name }}</span><br>
+                                         <span class="float-start">Date of Joining</span> <span class="float-end contact_number">14 Sept 2022</span>
+                                    </div>
+                                    <div class="col-md-6 col-sm-12 border-start mt-1">
+                                        <span class="float-start">Contact Number</span> <span class="float-end contact_number">{{ request.session.user_detail.contact_number }}</span><br>
+                                        <span class="float-start">Email ID</span> <span class="float-end email">{{ request.session.user_detail.email }}</span><br>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Your Statics</h5>
+                                <p class="card-text">
+                                <div class="row mx-3 bg-gray">
+                                    <div class="col-md-2 border-end border-secondary border-1 p-1 text-center fw-bold">
+                                        Rank <br> <span
+                                            class="badge text-bg-primary">{{ request.session.profile_stats.rank }}<i
+                                            class="bi bi-star"></i></span></div>
+                                    <div class="col-md-3 border-end border-secondary border-1 p-1 text-center fw-bold">
+                                        Pending Questions <br>
+                                        <span class="badge text-bg-warning"> {{ request.session.profile_stats.question.total|sub:request.session.profile_stats.question.approved }} / {{ request.session.profile_stats.question.total }} </span>
+                                    </div>
+                                    <div class="col-md-2 border-end border-secondary border-1 p-1 text-center fw-bold">
+                                        Question Votes<br>
+                                        <span class="badge text-bg-success">{{ request.session.profile_stats.question.up_votes }} <i
+                                                class="bi bi-arrow-up"></i></span> | <span
+                                            class="badge text-bg-warning">{{ request.session.profile_stats.question.down_votes }} <i
+                                            class="bi bi-arrow-down"></i></span>
+                                    </div>
+                                    <div class="col-md-2 border-end border-secondary border-1 p-1 text-center fw-bold"> Total Answers by You<br>
+                                        <span class="badge text-bg-success"> {{ request.session.profile_stats.answer.total }} </span>
+                                    </div>
+                                    <div class="col-md-2 border-1 p-1 text-center fw-bold"> Report(s)<br>
+                                        <span class="badge text-bg-danger"> 3 </span>
+                                    </div>
+                                </div>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="tab-pane fade" id="pills-contact" role="tabpanel" aria-labelledby="pills-contact-tab"
+                 tabindex="0">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Special title treatment</h5>
+                                <p class="card-text">With supporting text below as a natural lead-in to additional
+                                    content.</p>
+                                <a href="#" class="btn btn-primary">Go somewhere</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="pills-disabled" role="tabpanel" aria-labelledby="pills-disabled-tab"
+                 tabindex="0">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Account Suspension</h5>
+                                <p class="card-text">You will be blocked and your account will be suspended if you break our policy one more time.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="edit_profile_modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">Upload Profile</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        <img role="button" class="d-block mx-auto mb-3 p-3 rounded-circle" id="upload-profile" src="{{ request.session.user_detail.image }}" alt="" width="140"
+                        height="140">
+                    </div>
+                    <input type="file" class="hidden" id="inpuProfileImage" name="image">
+                    <div class="row mx-1">
+                        <textarea rows="3" class="form-control p-2" name="description" id="description">{{ request.session.user_detail.description }}</textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="$('#upload-profile').prop('src', '{{ request.session.user_detail.image }}')">Close</button>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="profileUpdateBtn">Upload</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="personDetailModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">Update Profile Detail</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="personDetailForm" enctype="">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="first_name" class="form-label">First Name</label>
+                                <input type="text" class="form-control" name="first_name" id="first_name">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="last_name" class="form-label">Last Name</label>
+                                <input type="text" class="form-control" name="last_name" id="last_name">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="first_name" class="form-label">Contact No.</label>
+                                <input type="text" class="form-control" name="contact_number" id="contact_number">
+                                <div id="emailHelp" class="form-text">We'll never share your email with anyone else.
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="last_name" class="form-label">Email Id</label>
+                                <input type="email" class="form-control" name="email" id="email">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="personalDetailUpdateBtn">Update</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock sub_content %}
+{% block script %}
+    <script>
+        var files;
+        $("#upload-profile").click(function (e) {
+            $('#inpuProfileImage').click();
+        })
+        $('#inpuProfileImage').change(function (e) {
+            files = !!this.files ? this.files : [];
+            if (!files.length || !window.FileReader) {
+                return;
+            }
+            console.log("Profile changes", files[0].type, /^image/.test(files[0].type))
+            setProfile(files[0], $("#upload-profile"))
+        });
+        const setProfile = (file_obj, profileSelector)=> {
+            if (/^image/.test(file_obj.type)) {
+                var reader = new FileReader(); // instance of the FileReader
+                reader.readAsDataURL(file_obj); // read the local file
+                reader.onloadend = function () {
+                    profileSelector.attr("src", this.result);
+                    console.log("set Profile", profileSelector)
+                };
+            }
+        }
+
+        $('#profileUpdateBtn').click(function (e){
+            e.preventDefault();
+            let formdata = new FormData();
+            if (files){
+                formdata.append('image', files[0])
+            }
+            formdata.append('description', $('#description').val())
+            $.ajax({
+                url:base_url+'core/{{ request.session.user_detail.id }}/',
+                type:'PATCH',
+                data: formdata,
+                processData: false,
+                contentType: false,
+                headers:headers,
+                success:function (data){
+                    console.log("Successfully Update profile ", data)
+                    if (files){
+                        setProfile(files[0], $("#profileImage"))
+                    }
+                    $('.profile-pic-div .description').text(data.description)
+                    reloadSession();
+                    console.log("Set Actual Profile")
+                },
+                error: function (error) {
+                    toastr.error('Failed to update profile image, Please try later.', 'Error', {timeOut: 3000, closeButton: true});
+                }
+            })
+        })
+
+        $('#personDetailModal').on('show.bs.modal', function (e){
+            Object.entries(current_profile).map(
+                (obj)=>{
+                    let key = obj[0];
+                    let value = obj[1];
+                    $('#'+key).val(value);
+                }
+            )
+        })
+        $('#personalDetailUpdateBtn').click(function (e){
+            e.preventDefault();
+            let formdata = new FormData($('#personDetailForm').get(0));
+            {#for (const [key, value] of formdata) {#}
+            {#    console.log(`${key}: ${value}\n`)#}
+            {#}#}
+            $.ajax({
+                url:base_url+'core/{{ request.session.user_detail.id }}/',
+                type:'PATCH',
+                data:formdata,
+                processData: false,
+                contentType: false,
+                headers:headers,
+                success:function (data){
+                    console.log("Successfully Update profile ", data)
+                    current_profile = data;
+                    reloadSession();
+                    Object.entries(data).map(
+                        (obj) => {
+                            let key = obj[0];
+                            let value = obj[1];
+                            $('.person-detail-card .' + key).text(value);
+                        }
+                    )
+                    $('#personDetailModal').modal('hide');
+                },
+                error:function (error){
+                    console.log("error in UpdateProfile ", error)
+                }
+            })
+        })
+    </script>
+{% endblock script %}

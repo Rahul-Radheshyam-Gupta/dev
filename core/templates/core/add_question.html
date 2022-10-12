@@ -1,0 +1,125 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% load custom_template_filter %}
+{% block sub_content %}
+    <style>
+    .infinite-scroller {
+        border-bottom: none;
+    }
+    .bg-stats a:hover{
+        color: #fff;
+        font-size: 102%;
+        font-weight: bold;
+    }
+    </style>
+    <div class="mt-2">
+        <h6 class="ms-2 fw-bold"> Question Stats</h6>
+        <div class="row bg-light shadow-sm bg-stats mx-3 mb-1">
+            <a href="{% url 'requests' %}?tab_name=question&status=Pending" class="btn text-decoration-none col-sm-6 col-md-3 p-2 btn-outline-warning border border-none">{{ request.session.profile_stats.question.pending }} Pending</a>
+            <a href="{% url 'requests' %}?tab_name=question&status=Approved" class="btn text-decoration-none col-sm-6 col-md-3 p-2  btn-outline-success border border-none">{{ request.session.profile_stats.question.approved }} Approved</a>
+            <a href="{% url 'requests' %}?tab_name=question&status=Rejected" class="btn text-decoration-none col-sm-6 col-md-3 p-2  btn-outline-danger border border-none">{{ request.session.profile_stats.question.rejected }} Rejected</a>
+            <a href="{% url 'requests' %}?tab_name=category&status=Approved" class="btn text-decoration-none col-sm-6 col-md-3 p-2  btn-outline-primary border border-none"> View/Request category(s)</a>
+        </div>
+        <form method="post" class="mx-3 mt-3">
+            {% csrf_token %}
+            <div class="input-group mb-3 h-50">
+                <select class="form-control bg-white text-dark p-2" id="category">
+                    <option value="" selected>Select Question Category</option>
+                </select>
+            </div>
+            <div id="editor"></div>
+            <div style="float: right; margin:10px 10px 10px 0;">
+                <button id="bt" class="btn btn-primary" type="button">Send For Approval</button>
+                <button id="cancel" class="btn btn-danger" type="button" onclick="resetForm();">Reset</button>
+            </div>
+        </form>
+    </div>
+
+
+{% endblock sub_content %}
+
+{% block script %}
+    <script>
+        const resetForm = ()=> {
+            let url_without_params = window.location.href.split('?')[0];
+            // Since new history is added by removing query params but still request.GET.question_id will be present coz of django internal logic of cache
+            window.history.pushState('object', document.title, url_without_params);
+            $('#bt').text('Submit');
+            $('#category').val('').trigger('change');
+            $('#editor .ql-editor').html('');
+        }
+        let question_obj = {{ question_detail | js }};
+        var toolbarOptions = [
+            [{'header': [1, 2, 3, 4, 5, 6, false]}],
+            ['bold', 'italic', 'underline', 'link'],        // toggled buttons
+            [{'script': 'sub'}, {'script': 'super'}],      // superscript/subscript
+            [{'color': []}, {'background': []}],          // dropdown with defaults from theme
+            [{'align': []}],
+            ['blockquote', 'code-block'],
+            [{'list': 'ordered'}, {'list': 'bullet'}],
+            [{'indent': '-1'}, {'indent': '+1'}],          // outdent/indent
+            // ['image', 'video']
+        ];
+        var quill = new Quill('#editor', {
+            modules: {
+                toolbar: toolbarOptions
+            },
+            placeholder: 'Write your question here..',
+            width: '50%',
+            theme: 'snow'  // or 'bubble'
+        });
+
+        let question_id = '{{ request.GET.question_id }}';
+        if (question_id){
+            $('#editor .ql-editor').html(question_obj.question_text)
+            $('#category').val(question_obj.category).trigger('change');
+            setCategory(question_obj.category);
+        }
+        else{
+            setCategory();
+        }
+        $("#bt").click(function (e) {
+            let category = $('#category').val();
+            let html_content = $('.ql-editor').html();
+            if (category === ''){
+                toastr.error('Please select a category.', 'Error', {timeOut: 3000, closeButton: true});
+                return false;
+            }
+            if (html_content && html_content === '<p><br></p>'){
+                toastr.error('Please write something.', 'Error', {timeOut: 3000, closeButton: true});
+                return false;
+            }
+            let post_url = base_url+'dev/question/';
+            let method = 'POST';
+            let is_patch_request = question_id && window.location.href.split('?').length>1;
+            if (is_patch_request){
+                post_url = post_url+question_id+'/';
+                method = 'PATCH';
+            }
+            e.preventDefault();
+            console.log("html_content", html_content, current_profile.id)
+            $.ajax({
+                url: post_url,
+                method: method,
+                data: {
+                    'id':question_id,
+                    'action':'update',
+                    'category':$('#category').val(),
+                    'question_text': html_content,
+                    'X-CSRFToken': $('input[name=csrfmiddlewaretoken]').val(),
+                    'created_by': current_profile.id
+                },
+                headers:headers,
+                success: function (data) {
+                    console.log("Successfully added a post", data)
+                    resetForm();
+                    toastr.success('Successfully '+(is_patch_request?'Updated':'Added'), 'Success', {timeOut: 5000, closeButton: true})
+                },
+                error: function (error) {
+                    toastr.error('Something went wrong, Please try later', 'Error', {timeOut: 5000, closeButton: true})
+                }
+            })
+
+        })
+    </script>
+{% endblock script %}

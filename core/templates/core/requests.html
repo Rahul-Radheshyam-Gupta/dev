@@ -1,0 +1,512 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block sub_content %}
+    <link rel="stylesheet" href="{% static 'css/datatable.css' %}">
+    <style>
+        .question-stats {
+            font-size: 1rem;
+            margin: 1% 0% 0% 1%;
+        }
+        @media only screen and (max-width: 1000px) {
+            .question-stats {
+                font-size: 0.8rem;
+                margin: 1% 0% 0% 1%;
+            }
+
+        }
+        .individual-question-div:hover{
+            background-color: #e9ecef!important;
+        }
+        .vote-btn:hover{
+            background-color: #ced4da;
+            color: #1a1e21;
+        }
+
+        .pull-right {
+            float: right !important;
+        }
+    </style>
+    <div class="container">
+        <h6 class="my-3"> Manage Your All Questions and Categories </h6>
+        <ul class="w-100 nav nav-pills mb-3 mt-2" id="pills-tab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="pills-question-tab" data-bs-toggle="pill" data-bs-target="#pills-question"
+                        type="button" role="tab" aria-controls="pills-question" aria-selected="true">Questions
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pills-category-tab" data-bs-toggle="pill" data-bs-target="#pills-category"
+                        type="button" role="tab" aria-controls="pills-category" aria-selected="false">Categories
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pills-report-tab" data-bs-toggle="pill" data-bs-target="#pills-report"
+                        type="button" role="tab" aria-controls="pills-report" aria-selected="false">Reports
+                </button>
+            </li>
+        </ul>
+        <div class="tab-content border-top" style="min-height: 170px; width: 100%;" id="pills-tabContent">
+            <div class="tab-pane fade show active" id="pills-question" role="tabpanel"
+                 aria-labelledby="pills-question-tab">
+                <div class="container">
+                    <div class="d-flex my-3 align-items-center justify-content-between">
+                        <div class="row w-100">
+                            <div class="col-md-6">
+                                <label for="question_status" class="small"> Status </label>
+                                <select class="form-control bg-white text-dark p-2" id="question_status"
+                                        onclick="reLoadQuestionCategoryDatatable('question')">
+                                    <option selected value="Pending">Pending</option>
+                                    <option value="Approved">Approved</option>
+                                    <option value="Rejected">Rejected</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row w-100">
+                            <div class="col-md-6">
+                            </div>
+                            <div class="col-md-6">
+                                <a href="{% url 'add-question' %}"><button class="btn btn-outline-primary mt-4 pull-right">Add Question</button></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <table id="question_table" class="table table-striped mt-3 border-top w-100"
+                                >
+                                    <thead>
+                                    <tr>
+                                        <th data-data="question_text">Question</th>
+                                        <th data-data="created_by.first_name">Created By</th>
+                                        <th data-data="status">Status</th>
+                                        <th class="text-xs-center" data-data="status" data-searchable="false"
+                                            data-orderable="false">
+                                            Action
+                                        </th>
+                                    </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade show" id="pills-category" role="tabpanel"
+                 aria-labelledby="pills-category-tab">
+                <div class="container">
+                    <div class="d-flex my-3 align-items-center justify-content-between">
+                        <div class="row w-100">
+                            <div class="col-md-6">
+                                <label for="category_status" class="small"> Status </label>
+                                <select class="form-control bg-white text-dark p-2" id="category_status"
+                                        onchange="reLoadQuestionCategoryDatatable('category')">
+                                    <option selected value="Pending">Pending</option>
+                                    <option value="Approved">Approved</option>
+                                    <option value="Rejected">Rejected</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row w-100">
+                            <div class="col-md-6">
+                            </div>
+                            <div class="col-md-6">
+                                <button class="btn btn-outline-primary mt-4 pull-right" data-bs-toggle="modal"
+                                        data-bs-target="#category_modal" onchange="setResetCategoryModal()">Add Category
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <table id="category_table" class="table table-striped mt-3 border-top w-100">
+                                    <thead>
+                                    <tr>
+                                        <th data-data="category_name">Category Name</th>
+                                        <th data-data="created_by" data-searchable="false">Created By</th>
+                                        <th data-data="status" data-searchable="false">Status</th>
+                                        <th class="text-xs-center" data-data="status" data-searchable="false"
+                                            data-orderable="false">
+                                            Action
+                                        </th>
+                                    </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade show" id="pills-report" role="tabpanel"
+                 aria-labelledby="pills-report-tab">
+                <div class="container">
+                    <div class="d-flex my-3 align-items-center justify-content-between">
+                        <div class="row w-100">
+                            <div class="col-md-3">
+                                <label for="report_status" class="small">Status </label>
+                                <select class="form-control bg-white text-dark p-2" id="report_status"
+                                onchange="reLoadQuestionCategoryDatatable('report')">
+                                    <option selected value="Open">Open</option>
+                                    <option value="Closed">Closed</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3" style="float: left!important;">
+                                <label for="report_for" class="small"> Report Category </label>
+                                <select class="form-control bg-white text-dark p-2" id="report_for"
+                                onchange="reLoadQuestionCategoryDatatable('report')">
+                                    <option selected value="">All</option>
+                                    <option value="Question">Question</option>
+                                    <option value="Answer">Answer</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <table id="report_table" class="table table-striped mt-3 border-top w-100">
+                                    <thead>
+                                    <tr>
+                                        <th data-data="report_category"> Category</th>
+                                        <th data-data="feedback"> Description</th>
+                                        <th data-data="first_name" data-searchable="false">Reported By</th>
+                                        <th class="text-xs-center" data-data="is_resolved" data-searchable="false"
+                                            data-orderable="false">
+                                            Action
+                                        </th>
+                                    </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="category_modal" tabindex="-1" role="dialog" aria-labelledby="category_modal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="category_modal_header">Add Category</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mx-1">
+                        <input type="text" class="form-control p-2" name="category_name" id="category_name">
+                        <input type="hidden" name="category_id" id="category_id">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="submtCategoryButton">Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock sub_content %}
+
+{% block script %}
+    <script src="{% static 'js/datatable.js' %}"></script>
+    <script>
+        let is_category_table_initialise = false;
+        let is_question_table_initialise = false;
+        let is_report_table_initialise = false;
+        let category_table, question_table,report_table;
+        $(".nav-item .nav-link").click(function (e){
+            let current_selector = $(e.target);
+            let tab_type = current_selector.attr('id').split('-')[1]
+            if (tab_type === 'category' && !is_category_table_initialise){
+                initialiseCategoryTable();
+            }
+            else if (tab_type === 'question' && !is_question_table_initialise){
+                initialiseQuestionTable();
+            }
+            else if (tab_type === 'report' && !is_report_table_initialise){
+                initialiseReportTable()
+            }
+        })
+        $("#submtCategoryButton").click(function (e){
+            let category_id = $('#category_id').val();
+            categoryAjaxCall(category_id);
+        })
+        const categoryAjaxCall = (category_id='',requestion_action='') => {
+            let post_patch_url = base_url + 'dev/category/';
+            let requestion_type = 'POST';
+            if (category_id) {
+                requestion_type = 'PATCH';
+                post_patch_url = post_patch_url + category_id + '/';
+                if (!requestion_action){
+                    requestion_action = 'update'
+                }
+            }
+            else{
+                requestion_action = 'add'
+            }
+            $.ajax({
+                url: post_patch_url,
+                type: requestion_type,
+                data: {
+                    category_name: $('#category_name').val(),
+                    action: requestion_action,
+                },
+                headers: {
+                    "Authorization": 'JWT ' + '{{ request.session.access_token }}'
+                },
+                success: function (data) {
+                    toastr.success('Successfully ' + (requestion_action === "update" ? "Updated" : (category_id ? requestion_action : 'Added')), 'Success', {
+                        timeOut: 3000,
+                        closeButton: true
+                    });
+                    category_table.ajax.reload();
+                },
+                error: function (error) {
+                    toastr.error('Something went wrong, please try later', 'Error', {timeOut: 3000, closeButton: true});
+                }
+            })
+        }
+        const setResetCategoryModal = (current_selector=null) =>{
+            if(current_selector){
+                let category_id = current_selector.attr('data-id');
+                let category_name = current_selector.attr('data-value');
+                $('#category_id').val(category_id);
+                $('#category_name').val(category_name);
+                $('#category_modal_header').text('Update Category');
+                $('#submtCategoryButton').text('Update');
+            }
+            else{
+                $('#category_id').val('');
+                $('#category_name').val('');
+                $('#category_modal_header').text('Add Category');
+                $('#submtCategoryButton').text('Add');
+            }
+        }
+        setResetCategoryModal()
+        let initialiseCategoryTable = () => {
+            console.log("Initilise Category Table")
+            is_category_table_initialise = true;
+            category_table = $('#category_table').DataTable({
+                serverSide: true,
+                responsive: true,
+                scrollX: true,
+                buttons: ['csv', 'pdf'],
+                ajax: {
+                    url: base_url + "dev/category/?format=datatables&keep=id",
+                    type: 'GET',
+                    data: function (d) {
+                        d.status = $('#category_status').val()
+                    },
+                    headers: headers
+                },
+                columnDefs: [
+                    {
+                        'targets': 3,
+                        'render': function (data, type, row, meta) {
+                            console.log(row.id, row.status)
+                            if (data === 'Pending') {
+                                is_admin = true
+                                let action_html = '';
+                                if (is_admin) {
+                                    action_html = `
+                                        <span role="button" class="badge badge-pill text-bg-success approve" onclick="categoryAjaxCall(${row.id}, 'Approved')">Approve</span>
+                                        <span role="button" class="badge badge-pill text-bg-danger reject" onclick="categoryAjaxCall(${row.id}, 'Rejected')">Reject</span>
+                                    `
+                                }
+                                return `${action_html}
+                                        <span role="button" class="badge badge-pill text-bg-secondary edit" data-value="${row.category_name}" data-id="${row.id}" onclick="setResetCategoryModal($(this))" data-bs-toggle="modal" data-bs-target="#category_modal" >Edit</span>
+                                `
+                            } else {
+                                let span_color = data === 'Approved' ? 'success' : 'danger';
+                                return `<span class="badge badge-pill text-bg-${span_color}">${data}</span>
+                                `
+                            }
+                        }
+                    }
+                ]
+            })
+        }
+        let initialiseQuestionTable = () => {
+            is_question_table_initialise = true;
+            question_table = $('#question_table').DataTable({
+            serverSide: true,
+            responsive: true,
+            scrollX: true,
+            buttons: ['csv', 'pdf'],
+            ajax: {
+                url: base_url+"dev/question/?format=datatables&keep=id",
+                type: 'GET',
+                data: function (d){
+                  d.status = $('#question_status').val()
+                },
+                headers:headers
+            },
+            columnDefs : [
+                {
+                    'targets' : 3,
+                    'render' : function (data, type, row, meta ){
+                        if (data === 'Pending') {
+                            is_admin = true
+                            let action_html = '';
+                            if (is_admin){
+                                action_html = `
+                                    <span role="button" class="badge badge-pill text-bg-success approve">Approve</span>
+                                    <span role="button" class="badge badge-pill text-bg-danger reject">Reject</span>
+                                `
+                            }
+                            return `${action_html}
+                                    <a href="{% url 'add-question' %}?question_id=${row.id}"><span role="button" class="badge badge-pill text-bg-secondary edit">Edit</span></a>
+                            `
+                        }
+                        else{
+                            let span_color = data === 'Approved' ? 'success' : 'danger';
+                            return `<span class="badge badge-pill text-bg-${span_color}">${data}</span>
+                            `
+                        }
+                    }
+                }
+            ]
+        });
+        }
+
+        let initialiseReportTable = () => {
+            is_report_table_initialise = true;
+            report_table = $('#report_table').DataTable({
+            serverSide: true,
+            responsive: true,
+            scrollX: true,
+            buttons: ['csv', 'pdf'],
+            ajax: {
+                url: base_url+"dev/report/?format=datatables&keep=id,last_name, report_for,question_id,answer_id",
+                type: 'GET',
+                data: function (d){
+                  d.report_for=$('#report_for').val(),
+                  d.status=$('#report_status').val()
+                },
+                headers:headers
+            },
+            columnDefs : [
+                {
+                    'targets' : [0],
+                    'render' : function (data, type, row){
+                        return row.report_for + ' - ' + data;
+                    }
+                },
+                {
+                    'targets' : [2],
+                    'render' : function (data, type, row){
+                        return row.first_name+' '+row.last_name;
+                    }
+                },
+                {
+                    'targets' : [3],
+                    'render' : function (data, type, row){
+                        let html_content='';
+                        if (data){
+                             html_content += '<span class="badge badge-pill text-bg-secondary">Closed</span>'
+                        }
+                        else{
+                            html_content += '<span role="button" class="badge badge-pill text-bg-success resolve" onclick="updateReportStatus('+ row.id +')">Open</span>'
+                        }
+                        html_content += `<br><small><a class="text-decoration-none" href="{% url 'question-detail' %}?question_id=${row.question_id}&answer_id=${row.answer_id}"> view detail</a></small>`
+                        return html_content;
+                    }
+                }
+            ]
+        });
+        }
+
+        let tab_name_from_query = '{{ request.GET.tab_name }}';
+        if (tab_name_from_query === 'category' && !is_category_table_initialise){
+            $('#question_status').val('{{ request.GET.status }}' ? '{{ request.GET.status }}' : 'Pending' );
+            $('#pills-category-tab').click();
+        }else if(!is_question_table_initialise){
+            $('#question_status').val('{{ request.GET.status }}' ? '{{ request.GET.status }}' : 'Pending');
+            $('#pills-question-tab').click();
+        }
+
+
+        $('#question_table tbody').on('click', 'tr', function (e){
+            console.log("clicked on Table row")
+            let current_selector = $(e.target);
+            let table_data = question_table.row(this).data()
+            console.log("table data ", table_data)
+            if (current_selector.hasClass('approve')){
+                console.log("Approve Action")
+                updateQuestionStatus(table_data.id, 'Approved')
+            }
+            else if (current_selector.hasClass('reject')){
+                updateQuestionStatus(table_data.id, 'Rejected')
+            }
+            else if (current_selector.hasClass('edit')){
+                console.log("Edit Action")
+            }
+        })
+
+        const updateQuestionStatus = (question_id, status) => {
+            console.log("update ", question_id, status)
+            $.ajax({
+                url: base_url + 'dev/question/' + question_id + '/',
+                type: 'PATCH',
+                data: {
+                    status: status,
+                    action: status
+                },
+                headers: {
+                    "Authorization": 'JWT ' + '{{ request.session.access_token }}'
+                },
+                success: function (data) {
+                    console.log("Status Data", data)
+                    question_table.ajax.reload();
+                },
+                error: function (error) {
+                    console.log("Status Error", error)
+                }
+            })
+
+        }
+        const reLoadQuestionCategoryDatatable = (reload_for) => {
+            if (reload_for == 'category'){
+                if (is_category_table_initialise){
+                    category_table.ajax.reload()
+                }
+            }else if (reload_for == 'question'){
+                if (is_question_table_initialise){
+                    question_table.ajax.reload()
+                }
+            }
+            else if (reload_for == 'report'){
+                if (is_report_table_initialise){
+                    report_table.ajax.reload();
+                }
+            }
+
+        }
+
+        const updateReportStatus = (report_id) => {
+            console.log("update ", report_id)
+            $.ajax({
+                url: base_url + 'dev/report/' + report_id + '/',
+                type: 'PATCH',
+                data: {
+                    is_resolved: true
+                },
+                headers: {
+                    "Authorization": 'JWT ' + '{{ request.session.access_token }}'
+                },
+                success: function (data) {
+                    console.log("Status Report Data", data)
+                    report_table.ajax.reload();
+                },
+                error: function (error) {
+                    console.log("Status Report Error", error)
+                }
+            })
+
+        }
+
+    </script>
+{% endblock script %}

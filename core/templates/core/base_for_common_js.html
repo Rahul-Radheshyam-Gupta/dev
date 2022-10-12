@@ -1,0 +1,427 @@
+{% load static %}
+{% load custom_template_filter %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<script>
+    let base_url = '{{ request.session.base_url }}';
+    let headers = {
+        "Authorization": 'JWT ' + '{{ request.session.access_token }}'
+    }
+    let current_profile = {{ request.session.user_detail | js }};
+    let current_profile_stat = {{ request.session.profile_stats | js }};
+    let question_parent_div_for_edit = null;
+    let question_answer_parent_object_for_delete = {};
+
+
+    const reloadSession = () => {
+        /*
+        This function is used to update current login profile.
+        This function should be called whenever there is profile request update, just to keep profile in sync.
+         */
+        $.ajax({
+            url: "{% url 'reload-session' %}",
+            type: 'get',
+            success: function (data) {
+                console.log("Successfully reload session..")
+            }
+        })
+    }
+
+    const setCategory = (category_id='') => {
+        /*
+        This function gets list of category list and append category to category dropdown.
+        It takes 1 option param thats category_id.
+        If category_id is passed then it will populate category dropdown with the passed category_id.
+         */
+        $.ajax({
+            url: base_url + 'dev/category/',
+            type: 'get',
+            headers: headers,
+            success: function (data) {
+                categories = $('#category');
+                categories.empty();
+                data.forEach(
+                    function (category) {
+                        let option = `<option value="${category.id}"> ${category.category_name}  </option>`
+                        categories.append(option);
+                    }
+                )
+                categories.prepend('<option value="" selected> All Topic </option>')
+                if (category_id) {
+                    categories.val(category_id).trigger('change');
+                }
+            }
+        })
+    }
+
+
+    const getQuestions = (question_id = '') => {
+        /*
+            This function is used to get question list.
+            It takes 1 optional params:
+                question_id : required param, its id of question for which you want detail.
+         */
+        $('#selected_topic').text($('#category option:selected').text())
+        let get_url = base_url + 'dev/question/';
+        if (question_id) {
+            get_url = get_url + question_id + '/'
+        }
+        $.ajax({
+            url: get_url,
+            method: 'GET',
+            data: {
+                'category': $('#category').val(),
+                'search_key': $('#search_key').val(),
+                'question_page_count': $('#question_page_count').attr('page-count')
+            },
+            headers: headers,
+            beforeSend: function () {
+                $('.custom-loader').show();
+            },
+            complete: function () {
+                $('.custom-loader').hide();
+            },
+            success: function (data) {
+                console.log("Data", data)
+                let questions = $('#question_list');
+                if (question_id) {
+                    data = [data]
+                }
+
+                let current_page_count = $('#question_page_count').attr('page-count');
+                if (current_page_count == 0){
+                    questions.html('');
+                    if (data.length === 0){
+                        questions.append(
+                            '<div class="w-100 text-center py-3 fw-bold fs-3"> No questions </div>'
+                        )
+                    }
+                }
+                if (!question_id && data.length < 5){
+                    $('#question_page_count').hide();
+                }
+                data.forEach(
+                    function (question, index) {
+                        let current_profile_id = current_profile.id;
+                        let up_vote_list = JSON.parse(question.up_vote_list);
+                        let up_vote_count = question.up_votes;
+                        let allow_to_up_vote = up_vote_list.indexOf(current_profile_id) === -1
+                        let down_vote_list = JSON.parse(question.down_vote_list);
+                        let down_vote_count = question.down_votes;
+                        let allow_to_down_vote = down_vote_list.indexOf(current_profile_id) === -1
+
+                        let up_vote_funct = `voteAction('up', ${question.id}, 'question', $(this))`;
+                        let down_vote_funct = `voteAction('down', ${question.id}, 'question', $(this))`;
+
+
+                        question.created_at = moment(question.created_at).format('DD MMM YYYY hh:mm A')
+                        let answer = '<p> No answer added yet!</p>'
+                        is_answered = !question.pin_answer.no_answer && question.pin_answer.answer_count;
+                        if (is_answered) {
+                            question.pin_answer.created_at = moment(question.pin_answer.created_at).format('DD MMM YYYY hh:mm A')
+                            answer = `
+                                    <p>Sol:
+                                        ${question.pin_answer.answer_text}
+                                    </p>
+                                    <small>
+                                        <span class="text-secondary">Added by ${question.pin_answer.answer_by} on
+                                         ${question.pin_answer.created_at} </span>
+                                         <span role="button" class="badge text-bg-warning text-white small pull-right" data-bs-toggle="modal" data-bs-target="#report_modal" onclick="setReportModalDefaultValue(${question.id} ,${question.pin_answer.id}, 'Answer')"> Report </span>
+                                     </small>
+                                    `
+                        }
+
+                        var top_stats = `
+                                    <div class="d-flex w-100 individual-question-action-div align-items-center justify-content-between">
+                                        <strong class="small"><img src="${question.created_by.image}" alt="RK" width="24" height="24"
+                                                             class="rounded-circle me-1">${question.created_by.first_name} ${question.created_by.last_name}</strong>
+                                        <small class="text-muted" style="font-size:0.7rem;">
+                                            <span role="button" class="border rounded-circle p-1 vote-btn up border-secondary" onclick="${up_vote_funct}" >${up_vote_count}<i class="bi bi-arrow-up"></i></span>
+                                            <span role="button" class="border rounded-circle p-1 vote-btn down border-secondary" onclick="${down_vote_funct}">${down_vote_count}<i class="bi bi-arrow-down"></i></span>
+                                            <a href="{% url 'add-question' %}?question_id=${question.id}"><i role="button" title="Edit" class="bi bi-pencil  border rounded-circle p-1 border-success" ></i></a>
+                                            <i role="button" title="Delete" class="bi bi-x border rounded-circle p-1 border-danger text-danger" data-object-type="question" data-object-id="${question.id}" onclick="storeDeleteQuestionAnswerIdOnModalOpen($(this))" data-bs-toggle="modal" data-bs-target="#deleteQuestion" ></i>
+                                        </small>
+                                    </div>
+                                    `
+                        let li_element = `
+                                        <li class="mb-1 individual-question-div p-2 shadow">
+                                            ${top_stats}
+                                            <div class="collapsed p-2">
+                                                <div class="flex-col ql-snow w-100">
+                                                    <span class="d-flex"> <div class="ql-editor w-100">${question.question_text} </div>
+                                                    <div>
+
+                                                    </div>
+                                                    </span>
+                                                    <small class="question-stats">
+                                                        <span class="badge text-bg-dark">${question.created_at}</span>
+                                                        <span class="badge text-bg-primary" title="Python, Django, React JS">${question.category_name}</span>
+                                                        <a href="{% url 'question-detail' %}?question_id=${question.id}"
+                                                        class="text-decoration-none {% if request.GET.question_id %} hidden {% else %}{% endif %}">
+                                                            <span role="button" class="badge text-bg-success">More Answers(${is_answered ? question.pin_answer.answer_count : 0})</span>
+                                                        </a>
+                                                        <span role="button" class="badge bg-purple" data-bs-toggle="collapse" data-bs-target="#q-${question.id}">Top Answer</span>
+                                                        <span role="button" class="badge text-bg-warning text-white pull-right" data-bs-toggle="modal" data-bs-target="#report_modal" onclick="setReportModalDefaultValue(${question.id},'', 'Question')"> Report </span>
+                                                    </small>
+                                                </div>
+                                            </div>
+                                            <div class="collapse border p-2 text-fam question-stats" id="q-${question.id}">
+                                                ${answer}
+                                            </div>
+                                        </li>`
+                        questions.append(li_element)
+                    }
+                )
+            },
+            error: function (error) {
+                console.log(error)
+                if (question_id){
+                    {#window.location.href = window.location.href.split("?")[0]#}
+                }
+                else{
+                    toastr.error('Something went wrong, Please try later', 'Error', {timeOut: 5000, closeButton: true})
+                }
+            }
+        })
+    }
+
+    let toggleLoginSignup = (current_selector, show_form_name = '') => {
+        /*
+        This function helps to toggle between login and sign up without page refresh.
+        It takes 2 params:
+            current_selector : required param, selector of current clicked button of login form.
+            show_form_name : option param, its either login or signup.
+         */
+        let form_name = show_form_name ? show_form_name : current_selector.prop('data-form-name');
+        if (form_name === 'login') {
+            current_selector.prop('data-form-name', 'signup');
+            current_selector.text('New on DreamView ? Do sign up.');
+            $('#new_password').parent().hide();
+        } else {
+            current_selector.text('Already have an account ? Do login.');
+            current_selector.prop('data-form-name', 'login');
+            $('#new_password').parent().show()
+        }
+        $('#login_signup_form_header').text(form_name === 'signup' ? 'Sign Up' : 'Login');
+        $('#login_signup_btn').text(form_name === 'signup' ? 'Sign Up' : 'Login');
+    }
+
+    const storeDeleteQuestionAnswerIdOnModalOpen = (current_selector) => {
+        /*
+        This function updates object_type and object_id for delete operation of question/answer.
+        Where object_type - its either Question or Answer.
+              object_id - its id of question/answer object depend on its object_type.
+         */
+        let object_type = current_selector.attr('data-object-type')
+        let object_id = current_selector.attr('data-object-id')
+        $('#delete_confirm_btn').attr('data-object-type', object_type)
+        $('#delete_confirm_btn').attr('data-object-id', object_id)
+        question_answer_parent_object_for_delete['object_type'] = object_type
+        question_answer_parent_object_for_delete['parent_div'] = object_type === 'answer' ? current_selector.parents('.list-group-item-action') : current_selector.parents('.individual-question-div');
+    }
+
+    const deleteQuestionAnswer = (current_selector) => {
+        /*
+        This function is for deletion of current clicked question or answer.
+        It takes current selector and from current selector it extracts object type and object id.
+        It performs soft delete.
+         */
+        let object_type = current_selector.attr('data-object-type')
+        let object_id = current_selector.attr('data-object-id')
+        let patch_url = base_url + 'dev/' + object_type + '/' + object_id + '/';
+        $.ajax({
+            url: patch_url,
+            method: 'PATCH',
+            data: {
+                'id': object_id,
+                'action':'delete',
+                'is_active': false,
+                'csrfmiddlewaretoken': $("input[name=csrfmiddlewaretoken]").val(),
+            },
+            headers: headers,
+            success: function (data) {
+                console.log("Successfully deleted", data)
+                toastr.success('Successfully deleted.', 'Success', {
+                    timeOut: 3000,
+                    closeButton: true
+                })
+                $('#deleteQuestion').modal('hide')
+                question_answer_parent_object_for_delete.parent_div.hide();
+            },
+            error: function (error) {
+                toastr.error('Something went wrong, Please try later', 'Error', {timeOut: 5000, closeButton: true})
+            }
+        })
+    }
+
+
+    const getAnswers = (question_id, answer_id = '', highlight=false) => {
+        /*
+            This function is used to get answer list of given question_id.
+            It takes 3 params:
+            question_id : required param, its id of question for which you want answer.
+            answer_id : optional param, if you pass answer id then it will get answer of passed answer_id.
+            highlight : optional param, for true it will append the answer to answer list div.
+                                        for false the response wil be returned.
+         */
+        $.ajax({
+            url: base_url + 'dev/answer/',
+            method: 'GET',
+            data: {
+                'question_id': question_id,
+                'answer_id': answer_id
+            },
+            headers: headers,
+            success: function (data) {
+                if (answer_id && !highlight) {
+                    console.log("Get Answer ", data)
+                    $('#answer_editor .ql-editor').html(data[0].answer_text)
+                    $('#answer_id').val(data[0].id);
+                    $('#submitCommentBtn').text('Update')
+                    $('#answer_div').show();
+                    $('.comment-box-btn').text('Hide Comment Box');
+                    return data;
+                }
+                let answer_list_div = $('.answer-list-div');
+                answer_list_div.html('')
+                if (data.length === 0){
+                    answer_list_div.append('<div class="list-group-item list-group-item-action pt-3 lh-sm shadow">No Answer Added Yet </div>')
+                }
+                console.log("Successfully added a post", data)
+                data.forEach(function (answer, index) {
+                    answerChilDiv(answer, answer_list_div)
+                })
+            },
+            error: function (error) {
+                console.log("Answer Error", error)
+                toastr.error('Something went wrong, Please try later', 'Error', {timeOut: 5000, closeButton: true})
+            }
+        })
+    }
+
+    const answerChilDiv = (answer, answer_list_div) => {
+        let current_profile_id = current_profile.id;
+        let up_vote_list = JSON.parse(answer.up_vote_list);
+        let up_vote_count = answer.up_votes;
+        let allow_to_up_vote = up_vote_list.indexOf(current_profile_id) === -1
+        let down_vote_list = JSON.parse(answer.down_vote_list);
+        let down_vote_count = answer.down_votes;
+        let allow_to_down_vote = down_vote_list.indexOf(current_profile_id) === -1
+
+        let up_vote_funct = `voteAction('up', ${answer.id}, 'answer', $(this))`;
+        let down_vote_funct = `voteAction('down', ${answer.id}, 'answer', $(this))`;
+        answer_list_div.append(
+            `
+                                <div class="list-group-item list-group-item-action pt-3 lh-sm shadow ${answer.id==answer_id_from_url ? 'border border-danger' : ''}">
+                                    <div class="d-flex w-100 align-items-center justify-content-between">
+                                        <strong class="small"><img src="${current_profile.image}" alt="RK" width="24" height="24"
+                                                             class="rounded-circle me-1"> ${current_profile.first_name} ${current_profile.last_name}</strong>
+                                        <small class="text-muted">
+                                            <span role="button" class="border rounded-circle p-1 vote-btn up" onclick="${up_vote_funct}">${up_vote_count}<i class="bi bi-arrow-up"></i></span>
+                                            <span role="button" class="border rounded-circle p-1 vote-btn down" onclick="${down_vote_funct}">${down_vote_count}<i class="bi bi-arrow-down"></i></span>
+                                            <i class="bi bi-pencil border rounded-circle p-1" data-answer-id="${answer.id}" onclick="scrollUp($(this))"></i>
+                                            <i class="bi bi-x border rounded-circle p-1 text-danger" data-bs-toggle="modal" data-bs-target="#deleteQuestion" data-object-type="answer" data-object-id="${answer.id}" onclick="storeDeleteQuestionAnswerIdOnModalOpen($(this))"></i>
+                                        </small>
+                                    </div>
+                                    <div class="col-10 w-100 ql-snow small">
+                                        <div class="ql-editor">
+                                            ${answer.answer_text}
+                                        </div>
+                                        <small class="text-secondary pull-right" style="float:right;">
+                                            <span class="badge text-dark">${moment(answer.created_at).format('DD MMM YYYY HH:mm A')}</span>
+                                             <span role="button" class="badge text-bg-warning text-${answer.id==answer_id_from_url ? 'danger' : 'white'} small"  data-bs-toggle="modal" data-bs-target="#report_modal" onclick="setReportModalDefaultValue(${answer.question_id}, ${answer.id},'Answer')"> Report </span>
+                                         </small>
+
+                                    </div>
+                                </div>
+                            `
+        )
+    }
+
+    const voteAction = (action, obj_id, vote_for, current_selector='') => {
+        $.ajax({
+            url: base_url + 'dev/like_dislike/',
+            type: 'POST',
+            data: {
+                action: action,
+                obj_id: obj_id,
+                vote_for: vote_for
+            },
+            headers: {
+                "Authorization": 'JWT ' + '{{ request.session.access_token }}'
+            },
+            success: function (data) {
+                console.log("Vote Count", data)
+                let down_vote_count = data.down_votes;
+                let up_vote_count = data.up_votes;
+                let parent_div = vote_for === 'answer' ? current_selector.parents('.list-group-item-action') : current_selector.parents('.individual-question-action-div');
+                parent_div.find('.up').html(`${up_vote_count}<i class="bi bi-arrow-up"></i>`)
+                parent_div.find('.down').html(`${down_vote_count}<i class="bi bi-arrow-down"></i>`);
+            },
+            error: function (error) {
+                console.log("Vote Error", error)
+            }
+        })
+
+    }
+
+    const loadMoreQuestion = (current_selector) => {
+        current_page_count = Number(current_selector.attr('page-count'))
+        current_selector.attr('page-count', current_page_count+1);
+        getQuestions();
+    }
+
+    applyQuestionFilter = () => {
+        $('#question_page_count').show();
+       $('#question_page_count').attr('page-count', 0);
+       getQuestions();
+    }
+
+    const setReportModalDefaultValue = (question_id, answer_id, report_for) =>{
+        $('#report_category').val('').trigger('change');
+        $('#report_feedback').val('');
+        $("#submitReportButton").prop('data-report-for', report_for);
+        $("#submitReportButton").prop('data-question-id', question_id);
+        $("#submitReportButton").prop('data-answer-id', answer_id);
+    }
+
+    const submitReportForm = (current_selector) => {
+        let report_for = $("#submitReportButton").prop('data-report-for');
+        let answer_id = $("#submitReportButton").prop('data-answer-id');
+        let question_id = $("#submitReportButton").prop('data-question-id');
+        $.ajax({
+            url: base_url + 'dev/report/',
+            type: 'POST',
+            data: {
+                report_for: report_for,
+                question_id: question_id,
+                answer_id: answer_id,
+                report_category: $('#report_category').val(),
+                feedback: $('#report_feedback').val(),
+                created_by: '{{ request.session.user_detail.id }}'
+            },
+            headers: {
+                "Authorization": 'JWT ' + '{{ request.session.access_token }}'
+            },
+            success: function (data) {
+                 toastr.success('Successfully report submitted', 'Success', {
+                    timeOut: 3000,
+                    closeButton: true
+                })
+            },
+            error: function (error) {
+               toastr.error('Failed to raise report, please try later.', 'Error', {
+                    timeOut: 3000,
+                    closeButton: true
+                })
+            }
+        })
+    }
+</script>
+</body>
+</html>

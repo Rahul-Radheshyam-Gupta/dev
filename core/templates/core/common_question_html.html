@@ -1,0 +1,60 @@
+    <div class="modal fade bd-example-modal-sm" id="deleteQuestion" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Confirmation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete this question?
+                </div>
+                <div class="modal-footer flex-nowrap p-0">
+                    <button type="button" id="delete_confirm_btn" data-object-type="" data-object-id="" onclick="deleteQuestionAnswer($(this))"
+                            class="btn btn-lg btn-danger fs-6 text-decoration-none col-6 m-0 rounded-0 ">
+                        <strong>Yes, delete</strong></button>
+                    <button type="button" class="btn btn-lg btn-secondary fs-6 text-decoration-none col-6 m-0  rounded-0"
+                            data-bs-dismiss="modal">No
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="custom-loader" style="position:absolute; top: 50%; left: 40%;">
+        <div class="spinner-border text-success p-1" role="status"></div>
+        <div class="spinner-border text-success p-1" role="status"></div>
+        <div class="spinner-border text-success p-1" role="status"></div>
+    </div>
+
+
+    <div class="modal fade" id="report_modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">Report</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mx-1">
+                        <select class="form-control" id="report_category" name="report_category">
+                            <option value="">Select Report Category</option>
+                            <option value="Copy and Paste"> Copy and Paste</option>
+                            <option value="Abusive language used"> Abusive language used</option>
+                            <option value="Inappropriate Question/Answer"> Inappropriate Question/Answer</option>
+                            <option value="other"> Other</option>
+                        </select>
+                    </div>
+                    <div class="row mx-1 mt-2">
+                        <textarea rows="3" class="form-control p-2" name="report_feedback" id="report_feedback"
+                                  placeholder="Write feedback" id="report_feedback"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" data-report-for="" data-question-id="" data-answer-id="" data-bs-dismiss="modal" onclick="submitReportForm($(this))" id="submitReportButton">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <a href="javascript:void(0);" id="question_page_count" onclick="loadMoreQuestion($(this))" title="More Questions" page-count="0" class="badge text-bg-primary text-decoration-none {% if request.GET.question_id %} hidden {% else %}{% endif %}" style="position: fixed;bottom: 1%; right: 50%;">Load Questions</a>
+    <a href="{% url 'add-question' %}" title="Add a Question" class="badge text-primary text-decoration-none {% if request.GET.question_id %} hidden {% else %}{% endif %}" style="position: fixed;bottom: 5%; right: 5%;"><i class="bi bi-plus-circle fs-1"></i></a>
