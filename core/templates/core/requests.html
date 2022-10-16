@@ -123,7 +123,7 @@
                                     <thead>
                                     <tr>
                                         <th data-data="category_name">Category Name</th>
-                                        <th data-data="created_by" data-searchable="false">Created By</th>
+                                        <th data-data="first_name" data-searchable="false">Created By</th>
                                         <th data-data="status" data-searchable="false">Status</th>
                                         <th class="text-xs-center" data-data="status" data-searchable="false"
                                             data-orderable="false">
@@ -295,7 +295,7 @@
                 scrollX: true,
                 buttons: ['csv', 'pdf'],
                 ajax: {
-                    url: base_url + "dev/category/?format=datatables&keep=id",
+                    url: base_url + "dev/category/?format=datatables&keep=id,last_name",
                     type: 'GET',
                     data: function (d) {
                         d.status = $('#category_status').val()
@@ -304,13 +304,18 @@
                 },
                 columnDefs: [
                     {
+                        'targets': 1,
+                        'render': function (data, type, row) {
+                            return row.first_name + ' ' + row.last_name;
+                        }
+                    },
+                    {
                         'targets': 3,
                         'render': function (data, type, row, meta) {
                             console.log(row.id, row.status)
                             if (data === 'Pending') {
-                                is_admin = true
-                                let action_html = '';
-                                if (is_admin) {
+                                let action_html = '<span class="badge badge-pill text-bg-warning">Pending</span>';
+                                if (current_profile.is_super_admin) {
                                     action_html = `
                                         <span role="button" class="badge badge-pill text-bg-success approve" onclick="categoryAjaxCall(${row.id}, 'Approved')">Approve</span>
                                         <span role="button" class="badge badge-pill text-bg-danger reject" onclick="categoryAjaxCall(${row.id}, 'Rejected')">Reject</span>
@@ -337,7 +342,7 @@
             scrollX: true,
             buttons: ['csv', 'pdf'],
             ajax: {
-                url: base_url+"dev/question/?format=datatables&keep=id",
+                url: base_url+"dev/question/?format=datatables&keep=id,created_by",
                 type: 'GET',
                 data: function (d){
                   d.status = $('#question_status').val()
@@ -346,12 +351,17 @@
             },
             columnDefs : [
                 {
+                    'targets' : 1,
+                    'render' : function (data, type, row){
+                        return row.created_by.first_name + ' ' + row.created_by.last_name;
+                    }
+                },
+                {
                     'targets' : 3,
                     'render' : function (data, type, row, meta ){
                         if (data === 'Pending') {
-                            is_admin = true
-                            let action_html = '';
-                            if (is_admin){
+                            let action_html = '<span class="badge badge-pill text-bg-warning">Pending</span>';
+                            if (current_profile.is_super_admin){
                                 action_html = `
                                     <span role="button" class="badge badge-pill text-bg-success approve">Approve</span>
                                     <span role="button" class="badge badge-pill text-bg-danger reject">Reject</span>
@@ -409,7 +419,12 @@
                              html_content += '<span class="badge badge-pill text-bg-secondary">Closed</span>'
                         }
                         else{
-                            html_content += '<span role="button" class="badge badge-pill text-bg-success resolve" onclick="updateReportStatus('+ row.id +')">Open</span>'
+                            if (current_profile.is_super_admin){
+                                html_content += '<span role="button" class="badge badge-pill text-bg-success resolve" onclick="updateReportStatus('+ row.id +')">Close this</span>'
+                            }
+                            else{
+                                html_content += '<span class="badge badge-pill text-bg-warning">Open</span>'
+                            }
                         }
                         html_content += `<br><small><a class="text-decoration-none" href="{% url 'question-detail' %}?question_id=${row.question_id}&answer_id=${row.answer_id}"> view detail</a></small>`
                         return html_content;

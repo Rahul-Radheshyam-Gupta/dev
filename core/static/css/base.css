@@ -27,6 +27,10 @@
     .login_signup_bg{
         height: 100vh!important;
     }
+    .profile_stats div{
+        border:none!important;
+        margin-bottom: 5px!important; ;
+    }
 
 }
 

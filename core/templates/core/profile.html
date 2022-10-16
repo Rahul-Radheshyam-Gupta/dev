@@ -67,7 +67,7 @@
                             <div class="card-body">
                                 <h5 class="card-title">Your Statics</h5>
                                 <p class="card-text">
-                                <div class="row mx-3 bg-gray">
+                                <div class="row mx-3 bg-gray profile_stats">
                                     <div class="col-md-2 border-end border-secondary border-1 p-1 text-center fw-bold">
                                         Rank <br> <span
                                             class="badge text-bg-primary">{{ request.session.profile_stats.rank }}<i
@@ -86,8 +86,8 @@
                                     <div class="col-md-2 border-end border-secondary border-1 p-1 text-center fw-bold"> Total Answers by You<br>
                                         <span class="badge text-bg-success"> {{ request.session.profile_stats.answer.total }} </span>
                                     </div>
-                                    <div class="col-md-2 border-1 p-1 text-center fw-bold"> Report(s)<br>
-                                        <span class="badge text-bg-danger"> 3 </span>
+                                    <div class="col-md-2 border-1 p-1 text-center fw-bold"> Report(s) Done By You<br>
+                                        <span class="badge text-bg-danger"> {{ request.session.profile_stats.report.total }} </span>
                                     </div>
                                 </div>
                                 </p>
