@@ -90,8 +90,7 @@ def login_signup(request):
         email = request.POST.get('email')
         password = request.POST.get('password')
         if form_name == 'signup':
-            r = requests.post(base_url + 'core/', data={'username': username,'email':email, 'password': password},
-                             headers={"Authorization": "JWT " + request.session['access_token']})
+            r = requests.post(base_url + 'core/', data={'username': username,'email':email, 'password': password})
             if r.status_code != 201:
                 error = r.json() if r.status_code != 500 else 'Something Went wrong, Please try later'
                 return JsonResponse({'error': error}, status=400)
