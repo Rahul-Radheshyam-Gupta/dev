@@ -6,8 +6,9 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import Post
 import json
 from functools import wraps
+import os
 
-base_url = 'http://localhost:8001/'
+base_url = 'https://backend95.pythonanywhere.com/' if os.environ.get('LIVE', False) else 'http://localhost:8001/'
 
 
 def userLoginOrNot(function_name):
@@ -23,7 +24,6 @@ def set_session(request, setStatsToo=True):
     r = requests.get(base_url + 'core/get_profile/', headers={"Authorization": "JWT "+request.session['access_token']})
     print("User Detail is ", r.json())
     if r.status_code == 200:
-        request.session['base_url'] = base_url
         request.session['user_detail'] = r.json()[0]
     if setStatsToo:
         r = requests.get(base_url + 'core/profile_stats/', headers={"Authorization": "JWT "+request.session['access_token']})
@@ -76,6 +76,7 @@ def question_detail(request):
 
 @userLoginOrNot
 def dashboard(request):
+    print("base url ", base_url, os.environ.get('LIVE'))
     return render(request, 'core/dashboard.html', {'questions':[]})
 
 def login_signup(request):
@@ -100,6 +101,7 @@ def login_signup(request):
             return JsonResponse({'redirect_url':reverse('dashboard')})
         else:
             return JsonResponse({'error': 'Something Went wrong, Please try later'}, status=400)
+    request.session['base_url'] = base_url
     return render(request, 'core/login_signup.html', {'posts':''})
 
 @userLoginOrNot
