@@ -118,6 +118,14 @@
                         let up_vote_funct = `voteAction('up', ${question.id}, 'question', $(this))`;
                         let down_vote_funct = `voteAction('down', ${question.id}, 'question', $(this))`;
 
+                        let allow_to_edit = current_profile_id === question.created_by.id;
+                        let edit_delete_action = '';
+                        if (allow_to_edit || current_profile.is_super_admin){
+                            edit_delete_action = `
+                                <a href="{% url 'add-question' %}?question_id=${question.id}"><i role="button" title="Edit" class="bi bi-pencil  border rounded-circle p-1 border-success" ></i></a>
+                                <i role="button" title="Delete" class="bi bi-x border rounded-circle p-1 border-danger text-danger" data-object-type="question" data-object-id="${question.id}" onclick="storeDeleteQuestionAnswerIdOnModalOpen($(this))" data-bs-toggle="modal" data-bs-target="#deleteQuestion" ></i>
+                            `
+                        }
 
                         question.created_at = moment(question.created_at).format('DD MMM YYYY hh:mm A')
                         let answer = '<p> No answer added yet!</p>'
@@ -143,8 +151,7 @@
                                         <small class="text-muted" style="font-size:0.7rem;">
                                             <span role="button" class="border rounded-circle p-1 vote-btn up border-secondary" onclick="${up_vote_funct}" >${up_vote_count}<i class="bi bi-arrow-up"></i></span>
                                             <span role="button" class="border rounded-circle p-1 vote-btn down border-secondary" onclick="${down_vote_funct}">${down_vote_count}<i class="bi bi-arrow-down"></i></span>
-                                            <a href="{% url 'add-question' %}?question_id=${question.id}"><i role="button" title="Edit" class="bi bi-pencil  border rounded-circle p-1 border-success" ></i></a>
-                                            <i role="button" title="Delete" class="bi bi-x border rounded-circle p-1 border-danger text-danger" data-object-type="question" data-object-id="${question.id}" onclick="storeDeleteQuestionAnswerIdOnModalOpen($(this))" data-bs-toggle="modal" data-bs-target="#deleteQuestion" ></i>
+                                            ${edit_delete_action}
                                         </small>
                                     </div>
                                     `
@@ -198,17 +205,17 @@
             show_form_name : option param, its either login or signup.
          */
         let form_name = show_form_name ? show_form_name : current_selector.prop('data-form-name');
-        if (form_name === 'login') {
-            current_selector.prop('data-form-name', 'signup');
+        if (form_name === 'signup') {
+            current_selector.prop('data-form-name', 'login');
             current_selector.text('New on DreamView ? Do sign up.');
             $('#new_password').parent().hide();
         } else {
             current_selector.text('Already have an account ? Do login.');
-            current_selector.prop('data-form-name', 'login');
+            current_selector.prop('data-form-name', 'signup');
             $('#new_password').parent().show()
         }
-        $('#login_signup_form_header').text(form_name === 'signup' ? 'Sign Up' : 'Login');
-        $('#login_signup_btn').text(form_name === 'signup' ? 'Sign Up' : 'Login');
+        $('#login_signup_form_header').text(form_name === 'signup' ? 'Login' :  'Sign Up');
+        $('#login_signup_btn').text(form_name === 'signup' ? 'Login' : 'Sign Up' );
     }
 
     const storeDeleteQuestionAnswerIdOnModalOpen = (current_selector) => {
@@ -313,19 +320,28 @@
         let down_vote_count = answer.down_votes;
         let allow_to_down_vote = down_vote_list.indexOf(current_profile_id) === -1
 
+        let allow_to_edit = current_profile_id === answer.created_by.id;
         let up_vote_funct = `voteAction('up', ${answer.id}, 'answer', $(this))`;
         let down_vote_funct = `voteAction('down', ${answer.id}, 'answer', $(this))`;
+
+        let edit_delete_action = '';
+        if (allow_to_edit){
+            edit_delete_action = `
+                <i class="bi bi-pencil border rounded-circle p-1" data-answer-id="${answer.id}" onclick="scrollUp($(this))"></i>
+                <i class="bi bi-x border rounded-circle p-1 text-danger" data-bs-toggle="modal" data-bs-target="#deleteQuestion" data-object-type="answer" data-object-id="${answer.id}" onclick="storeDeleteQuestionAnswerIdOnModalOpen($(this))"></i>
+            `
+        }
+
         answer_list_div.append(
             `
                                 <div class="list-group-item list-group-item-action pt-3 lh-sm shadow ${answer.id==answer_id_from_url ? 'border border-danger' : ''}">
                                     <div class="d-flex w-100 align-items-center justify-content-between">
-                                        <strong class="small"><img src="${current_profile.image}" alt="RK" width="24" height="24"
-                                                             class="rounded-circle me-1"> ${current_profile.first_name} ${current_profile.last_name}</strong>
+                                        <strong class="small"><img src="${answer.created_by.image}" alt="New User" width="24" height="24"
+                                                             class="rounded-circle me-1"> ${answer.created_by.first_name} ${answer.created_by.last_name}</strong>
                                         <small class="text-muted">
                                             <span role="button" class="border rounded-circle p-1 vote-btn up" onclick="${up_vote_funct}">${up_vote_count}<i class="bi bi-arrow-up"></i></span>
                                             <span role="button" class="border rounded-circle p-1 vote-btn down" onclick="${down_vote_funct}">${down_vote_count}<i class="bi bi-arrow-down"></i></span>
-                                            <i class="bi bi-pencil border rounded-circle p-1" data-answer-id="${answer.id}" onclick="scrollUp($(this))"></i>
-                                            <i class="bi bi-x border rounded-circle p-1 text-danger" data-bs-toggle="modal" data-bs-target="#deleteQuestion" data-object-type="answer" data-object-id="${answer.id}" onclick="storeDeleteQuestionAnswerIdOnModalOpen($(this))"></i>
+                                              ${edit_delete_action}
                                         </small>
                                     </div>
                                     <div class="col-10 w-100 ql-snow small">

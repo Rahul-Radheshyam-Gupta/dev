@@ -80,8 +80,18 @@ def dashboard(request):
 
 def login_signup(request):
     if request.method == "POST":
+        print("Form Post ", request.POST)
+        form_name = request.POST.get('form_name')
         username = request.POST.get('username')
+        email = request.POST.get('email')
         password = request.POST.get('password')
+        if form_name == 'signup':
+            r = requests.post(base_url + 'core/', data={'username': username,'email':email, 'password': password},
+                             headers={"Authorization": "JWT " + request.session['access_token']})
+            if r.status_code != 201:
+                error = r.json() if r.status_code != 500 else 'Something Went wrong, Please try later'
+                return JsonResponse({'error': error}, status=400)
+
         r = requests.post(base_url + 'core/api/token/', data={'username': username, 'password': password}, headers={})
         print("Token ", r.json())
         if r.status_code == 200:

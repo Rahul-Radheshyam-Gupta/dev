@@ -8,7 +8,7 @@
     <div class="px-4 py-2 text-center profile-pic-div">
         <div style="background-color: #ced4da">
             <i role="button" class="bi bi-pencil small float-end p-2 text-secondary" data-bs-toggle="modal" data-bs-target="#edit_profile_modal"> </i>
-            <img class="d-block mx-auto mb-3 p-3 rounded-circle" id="profileImage" src="{{ request.session.user_detail.image }}" alt="" width="120"
+            <img class="d-block mx-auto mb-3 p-3 rounded-circle" id="profileImage" src="{% if request.session.user_detail.image %} {{ request.session.user_detail.image }} {% else %} {% static 'bg/defaultProfile.png' %} {% endif %}" alt="" width="120"
                  height="120">
         </div>
         <h5>Rahul Gupta</h5>
@@ -138,7 +138,7 @@
                 </div>
                 <div class="modal-body">
                     <div>
-                        <img role="button" class="d-block mx-auto mb-3 p-3 rounded-circle" id="upload-profile" src="{{ request.session.user_detail.image }}" alt="" width="140"
+                        <img role="button" class="d-block mx-auto mb-3 p-3 rounded-circle" id="upload-profile" src="{% if request.session.user_detail.image %} {{ request.session.user_detail.image }} {% else %} {% static 'bg/defaultProfile.png' %} {% endif %}" alt="" width="140"
                         height="140">
                     </div>
                     <input type="file" class="hidden" id="inpuProfileImage" name="image">

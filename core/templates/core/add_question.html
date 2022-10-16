@@ -91,10 +91,12 @@
             }
             let post_url = base_url+'dev/question/';
             let method = 'POST';
+            let action = 'add';
             let is_patch_request = question_id && window.location.href.split('?').length>1;
             if (is_patch_request){
                 post_url = post_url+question_id+'/';
                 method = 'PATCH';
+                action = 'update';
             }
             e.preventDefault();
             console.log("html_content", html_content, current_profile.id)
@@ -102,8 +104,7 @@
                 url: post_url,
                 method: method,
                 data: {
-                    'id':question_id,
-                    'action':'update',
+                    'action':action,
                     'category':$('#category').val(),
                     'question_text': html_content,
                     'X-CSRFToken': $('input[name=csrfmiddlewaretoken]').val(),
