@@ -8,7 +8,10 @@ import json
 from functools import wraps
 import os
 
-base_url = 'https://backend95.pythonanywhere.com/' if os.environ.get('LIVE', False) else 'http://localhost:8001/'
+
+# base_url = 'http://localhost:8001/'
+base_url = 'https://backend95.pythonanywhere.com/'
+
 
 
 def userLoginOrNot(function_name):
