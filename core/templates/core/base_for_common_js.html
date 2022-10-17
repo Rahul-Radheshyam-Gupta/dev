@@ -137,6 +137,11 @@
                                         ${question.pin_answer.answer_text}
                                     </p>
                                     <small>
+                                        <a href="{% url 'question-detail' %}?question_id=${question.id}"
+                                                        class="text-decoration-none float-end {% if request.GET.question_id %} hidden {% else %}{% endif %}">
+                                                            <span role="button" class="text-primary">...see all answers(${is_answered ? question.pin_answer.answer_count : 0})</span>
+                                        </a>
+                                        <br>
                                         <span class="text-secondary">Added by ${question.pin_answer.answer_by} on
                                          ${question.pin_answer.created_at} </span>
                                          <span role="button" class="badge text-bg-warning text-white small pull-right" data-bs-toggle="modal" data-bs-target="#report_modal" onclick="setReportModalDefaultValue(${question.id} ,${question.pin_answer.id}, 'Answer')"> Report </span>
@@ -162,16 +167,11 @@
                                                 <div class="flex-col ql-snow w-100">
                                                     <span class="d-flex"> <div class="ql-editor w-100">${question.question_text} </div>
                                                     <div>
-
                                                     </div>
                                                     </span>
                                                     <small class="question-stats">
                                                         <span class="badge text-bg-dark">${question.created_at}</span>
                                                         <span class="badge text-bg-primary" title="Python, Django, React JS">${question.category_name}</span>
-                                                        <a href="{% url 'question-detail' %}?question_id=${question.id}"
-                                                        class="text-decoration-none {% if request.GET.question_id %} hidden {% else %}{% endif %}">
-                                                            <span role="button" class="badge text-bg-success">More Answers(${is_answered ? question.pin_answer.answer_count : 0})</span>
-                                                        </a>
                                                         <span role="button" class="badge bg-purple" data-bs-toggle="collapse" data-bs-target="#q-${question.id}">Top Answer</span>
                                                         <span role="button" class="badge text-bg-warning text-white pull-right" data-bs-toggle="modal" data-bs-target="#report_modal" onclick="setReportModalDefaultValue(${question.id},'', 'Question')"> Report </span>
                                                     </small>
