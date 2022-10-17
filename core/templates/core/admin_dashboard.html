@@ -1,0 +1,212 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block sub_content %}
+    <link rel="stylesheet" href="{% static 'css/datatable.css' %}">
+    <style>
+
+    </style>
+    <div class="container">
+        <h6 class="my-3"> Manage Your All Questions and Categories </h6>
+        <ul class="w-100 nav nav-pills mb-3 mt-2" id="pills-tab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="pills-question-tab" data-bs-toggle="pill" data-bs-target="#pills-question"
+                        type="button" role="tab" aria-controls="pills-question" aria-selected="true">Profiles
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pills-category-tab" data-bs-toggle="pill" data-bs-target="#pills-category"
+                        type="button" role="tab" aria-controls="pills-category" aria-selected="false">Action
+                </button>
+            </li>
+        </ul>
+        <div class="tab-content border-top" style="min-height: 170px; width: 100%;" id="pills-tabContent">
+            <div class="tab-pane fade show active" id="pills-question" role="tabpanel"
+                 aria-labelledby="pills-question-tab">
+                <div class="container">
+                    <div class="d-flex my-3 align-items-center justify-content-between">
+                        <div class="row w-100">
+                            <div class="col-md-6">
+                                <label for="profile_status" class="small"> Status </label>
+                                <select class="form-control bg-white text-dark p-2" id="profile_status"
+                                      >
+                                    <option selected value="Pending">Pending</option>
+                                    <option value="Approved">Approved</option>
+                                    <option value="Rejected">Rejected</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <table id="profile_table" class="table table-striped mt-3 border-top w-100">
+                                    <thead>
+                                    <tr>
+                                        <th data-data="first_name">Profile Name</th>
+                                        <th data-data="email">Contact Detail</th>
+                                        <th data-data="is_verified">Verified?</th>
+                                        <th data-data="is_super_admin">SuperAdmin?</th>
+                                        <th class="text-xs-center" data-data="is_super_admin" data-searchable="false"
+                                            data-orderable="false">
+                                            Action
+                                        </th>
+                                    </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade show" id="pills-category" role="tabpanel"
+                 aria-labelledby="pills-category-tab">
+                <div class="container">
+                    <div class="text-center">
+                        <div class="row p-2">
+                            <div class="col-md-6 p-1">
+                                <div class="card py-4 btn btn-outline-primary ">
+                                    Update Rank
+                                </div>
+                            </div>
+                            <div class="col-md-6 p-1">
+                                <div role="button" class="card py-4 btn btn-outline-primary">
+                                    Raise Notice
+                                </div>
+                            </div>
+                            <div class="col-md-6 p-1">
+                                <div role="button" class="card py-4 btn btn-outline-primary">
+                                    Raise Announcement
+                                </div>
+                            </div>
+                            <div class="col-md-6 p-1">
+                                <div role="button" class="card py-4 btn btn-outline-primary">
+                                    More Actions
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="profileUpdateModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">Update Profile</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <span class="p-2 mb-2"> Are sure to update Rahul Gupta's Profile?</span>
+                    <div class="row mt-2">
+                        <input type="hidden" id="profile_id">
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch"
+                                id="is_verified">
+                                <label class="form-check-label" for="is_verified">Verify</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch"
+                                       id="is_super_admin">
+                                <label class="form-check-label" for="is_super_admin">Super Admin</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close
+                    </button>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="profileUpdateBtn">Update
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock sub_content %}
+
+{% block script %}
+    <script src="{% static 'js/datatable.js' %}"></script>
+    <script>
+
+    let profile_table = $('#profile_table').DataTable({
+                serverSide: true,
+                responsive: true,
+                scrollX: true,
+                buttons: ['csv', 'pdf'],
+                ajax: {
+                    url: base_url + "core/get_profile/?format=datatables&keep=id,last_name,created_at,contact_number,image",
+                    type: 'GET',
+                    data: function (d) {
+                        d.status = $('#category_status').val()
+                    },
+                    headers: headers
+                },
+                columnDefs: [
+                    {
+                        'targets': 0,
+                        'className':'small',
+                        'render': function (data, type, row) {
+                            return ((row.image ? `<span><img src="${row.image}" width="24" height="24" class="rounded-circle me-1 zoom-on-hover"></span> ` : '')
+                                +row.first_name + ' ' + row.last_name) ;
+                        }
+                    },
+                    {
+                        'targets': 1,
+                        'className':'small',
+                        'render': function (data, type, row) {
+                            return data+(row.contact_number ? '<br>'+row.contact_number : '')+'<br>'+moment(row.created_at).format('DD MMM YYYY hh:mm A');
+                        }
+                    },
+                    {
+                        'targets': [2,3],
+                        'className':'text-center',
+                        'render': function (data, type, row) {
+                            return data ? '<span class="text-success">Yes</span>' : '<span class="text-danger">No</span>'
+                        }
+                    },
+                    {
+                        'targets': 4,
+                        'render': function (data, type, row) {
+                            return `<span role="button" class="badge bg-primary" data-bs-toggle="modal" data-bs-target="#profileUpdateModal" onclick="setProfileModal(${row.id}, ${row.is_verified}, ${row.is_super_admin})"> Update  </span>`;
+                        }
+                    }
+                ]
+            })
+
+        const setProfileModal = (profile_id, isVerfied, isSuperAdmin) => {
+            $('#profile_id').val(profile_id);
+            $('#is_verified').prop('checked', isVerfied);
+            $('#is_super_admin').prop('checked', isSuperAdmin);
+        }
+        $('#profileUpdateBtn').click(function (e){
+            e.preventDefault();
+            let profile_id = $('#profile_id').val()
+            let data = {
+                is_verified: $('#is_verified').is(':checked'),
+                is_super_admin: $('#is_super_admin').is(':checked')
+            }
+            $.ajax({
+                url:base_url+`core/${profile_id}/`,
+                type:'PATCH',
+                data:data,
+                headers:headers,
+                success:function (data){
+                    console.log("Successfully Update profile ", data)
+                    profile_table.ajax.reload();
+                    toastr.success('Successfully updated profile', 'Success', {timeOut: 3000, closeButton: true});
+                },
+                error:function (error){
+                    console.log("error in UpdateProfile ", error)
+                    toastr.error('Failed to update profile detail, Please try later.', 'Error', {timeOut: 3000, closeButton: true});
+                }
+            })
+        })
+
+    </script>
+{% endblock script %}

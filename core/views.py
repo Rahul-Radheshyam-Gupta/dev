@@ -82,6 +82,10 @@ def dashboard(request):
     print("base url ", base_url, os.environ.get('LIVE'))
     return render(request, 'core/dashboard.html', {'questions':[]})
 
+@userLoginOrNot
+def admin_dashboard(request):
+    return render(request, 'core/admin_dashboard.html')
+
 def login_signup(request):
     if request.method == "POST":
         print("Form Post ", request.POST)
