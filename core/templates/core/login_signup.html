@@ -15,39 +15,60 @@
             opacity: 0.9;
             margin-bottom: 0;
         }
+        .login-signup-div .welcome-text{
+            display: none;
+        }
+        .login_signup_bg .welcome-div .lead{
+            font-weight: bold!important;
+        }
         @media (max-width:700px) {
             .login_signup_bg{
                 height: fit-content!important;
+                flex-direction: column-reverse!important;
             }
             .login_signup_bg form {
                 margin-bottom: 20px;
             }
+            .login_signup_bg .welcome-div {
+                background-color: #ffffff;
+                opacity: 0.6;
+            }
+
+            .login_signup_bg .welcome-div .welcome-text{
+                display: none;
+            }
+            .login-signup-div .welcome-text{
+                display: block;
+            }
+
         }
+        {#<a href="https://www.flaticon.com/free-icons/user" title="user icons">User icons created by Freepik - Flaticon</a>#}
     </style>
     <div class="flex-row w-100 login_signup_bg">
-        <div class="text-lg-start container py-5 ">
+        <div class="text-lg-start container py-5 text-black welcome-div">
             <div class="container">
-                <h2 class="fw-bold mb-3">Welcome to DreamView</h2>
-                <h5 class="">DreamView is a platform to grow and learn together.</h5>
+                <h2 class="fw-bold mb-3 welcome-text">Welcome to DreamView</h2>
+                <h5 class=""><strong class="fs-3">DreamView</strong> is a platform to boost your knowledge to get clear your dream job interview.</h5>
                 <div class="mx-auto">
                     <ul class="lead" style="list-style: devanagari; font-weight:400; opacity: 1; box-sizing: border-box;">
-                        <li> Share Your knowledge with other</li>
-                        <li> Get your logic and concept clear from our DreamViewers</li>
-                        <li> Learn Best practice of latest technology</li>
-                        <li> Get interview questions and answers</li>
-                        <li> Many More things and coming soon</li>
+                        <li> Simple and smart interface </li>
+                        <li> Get variety of questions with ease of use </li>
+                        <li> Advance features like rank, upvote, down vote and raise reports</li>
+                        <li> Suitable for all levels of developers   </li>
+                        <li> Weekly daily ranking system to motivate you to do more </li>
+                        <li> Many More things are coming soon</li>
                     </ul>
                 </div>
             </div>
 
             <div class="text-center mt-2 fw-bold border-top border-dark border-opacity-25 pt-2" style="margin-right: 15%!important;">
-                <h5 class="lead fw-bold"> Connect with us  </h5>
+                <h5 class="lead fw-bold"> Connect with Me  </h5>
                 <div class="btn-group btn-group-lg" role="group" aria-label="Small button group">
                     <button type="button" class="btn btn-outline-dark">
-                        <i class="bi bi-facebook"></i>
+                        <i class="bi bi-github"></i>
                     </button>
                     <button type="button" class="btn btn-outline-dark">
-                        <i class="bi bi-instagram"></i>
+                        <i class="bi bi-person"></i>
                     </button>
                     <button type="button" class="btn btn-outline-dark">
                         <i class="bi bi-linkedin"></i>
@@ -55,7 +76,8 @@
                 </div>
             </div>
         </div>
-        <div class="pt-5 w-100">
+        <div class="pt-5 w-100 login-signup-div">
+            <h2 class="fw-bold mb-3 pb-2 text-center welcome-text">Welcome to DreamView</h2>
             <form class="p-3 pb-4  border rounded-3 w-75 bg-light mx-auto" enctype="multipart/form-data">
                 <h3 class="py-2" id="login_signup_form_header"> Login</h3>
                 {% csrf_token %}
