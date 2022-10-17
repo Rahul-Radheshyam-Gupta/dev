@@ -67,7 +67,7 @@
                             <div class="card-body">
                                 <h5 class="card-title">Your Statics</h5>
                                 <p class="card-text">
-                                <div class="row mx-3 bg-gray profile_stats">
+                                <div class="row mx-3 bg-gray profile_stats small">
                                     <div class="col-md-2 border-end border-secondary border-1 p-1 text-center fw-bold">
                                         Rank <br> <span
                                             class="badge text-bg-primary">{{ request.session.profile_stats.rank }}<i
@@ -139,7 +139,7 @@
                 <div class="modal-body">
                     <div>
                         <img role="button" class="d-block mx-auto mb-3 p-3 rounded-circle" id="upload-profile" src="{% if request.session.user_detail.image %} {{ request.session.user_detail.image }} {% else %} {% static 'bg/defaultProfile.png' %} {% endif %}" alt="" width="140"
-                        height="140">
+                             height="140">
                     </div>
                     <input type="file" class="hidden" id="inpuProfileImage" name="image">
                     <div class="row mx-1">
@@ -261,9 +261,6 @@
         $('#personalDetailUpdateBtn').click(function (e){
             e.preventDefault();
             let formdata = new FormData($('#personDetailForm').get(0));
-            {#for (const [key, value] of formdata) {#}
-            {#    console.log(`${key}: ${value}\n`)#}
-            {#}#}
             $.ajax({
                 url:base_url+'core/{{ request.session.user_detail.id }}/',
                 type:'PATCH',

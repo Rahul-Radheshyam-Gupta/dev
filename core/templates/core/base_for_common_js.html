@@ -32,7 +32,7 @@
         })
     }
 
-    const setCategory = (category_id='') => {
+    const setCategory = (category_id='', show_all_category=true) => {
         /*
         This function gets list of category list and append category to category dropdown.
         It takes 1 option param thats category_id.
@@ -51,7 +51,7 @@
                         categories.append(option);
                     }
                 )
-                categories.prepend('<option value="" selected> All Topic </option>')
+                categories.prepend('<option value="" selected> '+ (show_all_category ? 'All Categories' : 'Select Category') +' </option>')
                 if (category_id) {
                     categories.val(category_id).trigger('change');
                 }
@@ -87,7 +87,7 @@
                 $('.custom-loader').hide();
             },
             success: function (data) {
-                console.log("Data", data)
+                console.log("Question List Loaded", data)
                 let questions = $('#question_list');
                 if (question_id) {
                     data = [data]
@@ -285,6 +285,7 @@
             },
             headers: headers,
             success: function (data) {
+                console.log("Answer Received", data)
                 if (answer_id && !highlight) {
                     console.log("Get Answer ", data)
                     $('#answer_editor .ql-editor').html(data[0].answer_text)
@@ -299,10 +300,12 @@
                 if (data.length === 0){
                     answer_list_div.append('<div class="list-group-item list-group-item-action pt-3 lh-sm shadow">No Answer Added Yet </div>')
                 }
-                console.log("Successfully added a post", data)
+                console.log("Successfully loaded answers", data)
                 data.forEach(function (answer, index) {
                     answerChilDiv(answer, answer_list_div)
                 })
+                console.log("Successfully loaded answers after", data)
+
             },
             error: function (error) {
                 console.log("Answer Error", error)
@@ -313,12 +316,8 @@
 
     const answerChilDiv = (answer, answer_list_div) => {
         let current_profile_id = current_profile.id;
-        let up_vote_list = JSON.parse(answer.up_vote_list);
         let up_vote_count = answer.up_votes;
-        let allow_to_up_vote = up_vote_list.indexOf(current_profile_id) === -1
-        let down_vote_list = JSON.parse(answer.down_vote_list);
         let down_vote_count = answer.down_votes;
-        let allow_to_down_vote = down_vote_list.indexOf(current_profile_id) === -1
 
         let allow_to_edit = current_profile_id === answer.created_by.id;
         let up_vote_funct = `voteAction('up', ${answer.id}, 'answer', $(this))`;

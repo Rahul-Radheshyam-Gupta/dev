@@ -24,7 +24,6 @@
             {% csrf_token %}
             <div class="input-group mb-3 h-50">
                 <select class="form-control bg-white text-dark p-2" id="category">
-                    <option value="" selected>Select Question Category</option>
                 </select>
             </div>
             <div id="editor"></div>
@@ -76,7 +75,7 @@
             setCategory(question_obj.category);
         }
         else{
-            setCategory();
+            setCategory('',false);
         }
         $("#bt").click(function (e) {
             let category = $('#category').val();
@@ -112,7 +111,7 @@
                 },
                 headers:headers,
                 success: function (data) {
-                    console.log("Successfully added a post", data)
+                    console.log("Successfully added a question", data)
                     resetForm();
                     toastr.success('Successfully '+(is_patch_request?'Updated':'Added'), 'Success', {timeOut: 5000, closeButton: true})
                 },

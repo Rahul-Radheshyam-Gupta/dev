@@ -57,3 +57,6 @@
 .pull-right{
     float: right!important;
 }
+.zoom-on-hover:hover{
+    transform: scale(1.5);
+}

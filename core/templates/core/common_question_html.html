@@ -56,5 +56,5 @@
             </div>
         </div>
     </div>
-    <a href="javascript:void(0);" id="question_page_count" onclick="loadMoreQuestion($(this))" title="More Questions" page-count="0" class="badge text-bg-primary text-decoration-none {% if request.GET.question_id %} hidden {% else %}{% endif %}" style="position: fixed;bottom: 1%; right: 50%;">Load Questions</a>
+    <a href="javascript:void(0);" id="question_page_count" onclick="loadMoreQuestion($(this))" title="More Questions" page-count="0" class="badge text-bg-primary text-decoration-none {% if request.GET.question_id %} hidden {% else %}{% endif %}" style="position: fixed;bottom: 1%; right: 50%;">More Questions</a>
     <a href="{% url 'add-question' %}" title="Add a Question" class="badge text-primary text-decoration-none {% if request.GET.question_id %} hidden {% else %}{% endif %}" style="position: fixed;bottom: 5%; right: 5%;"><i class="bi bi-plus-circle fs-1"></i></a>
