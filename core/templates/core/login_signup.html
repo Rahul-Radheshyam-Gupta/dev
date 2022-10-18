@@ -123,27 +123,9 @@ $("#login_signup_btn").click(function (e) {
         toastr.error('Password must matched', 'Error', {timeOut: 5000, closeButton: true})
         return false;
     }
-    $.ajax({
-        url: "{% url 'login-signup' %}",
-        method: 'POST',
-        data: {
-            username: username,
-            password: password,
-            email: email,
-            form_name: form_name,
-            csrfmiddlewaretoken: $("input[name=csrfmiddlewaretoken]").val()
-        },
-        success: function (data) {
-            toastr.success('Login Successfully', 'Success', {timeOut: 5000, closeButton: true})
-            console.log("Login Data ", data)
-            window.location.href = data['redirect_url']
-        },
-        error: function (error){
-            console.log("Error ", error)
-            toastr.error('Login Failed', 'Error', {timeOut: 5000, closeButton: true})
-        }
-    })
+    loginSignupAjaxCall(form_name, username, password, email);
 })
+
 
 </script>
 {% endblock script %}

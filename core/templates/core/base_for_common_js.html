@@ -128,7 +128,15 @@
                         }
 
                         question.created_at = moment(question.created_at).format('DD MMM YYYY hh:mm A')
-                        let answer = '<p> No answer added yet!</p>'
+                        let answer = `<p> No answer added yet!</p>
+                                        <small>
+                                            <a href="{% url 'question-detail' %}?question_id=${question.id}"
+                                                            class="text-decoration-none float-end {% if request.GET.question_id %} hidden {% else %}{% endif %}">
+                                                                <span role="button" class="text-primary">Add answer</span>
+                                            </a>
+                                        </small>
+                                        <br>
+                                    `
                         is_answered = !question.pin_answer.no_answer && question.pin_answer.answer_count;
                         if (is_answered) {
                             question.pin_answer.created_at = moment(question.pin_answer.created_at).format('DD MMM YYYY hh:mm A')
@@ -139,7 +147,7 @@
                                     <small>
                                         <a href="{% url 'question-detail' %}?question_id=${question.id}"
                                                         class="text-decoration-none float-end {% if request.GET.question_id %} hidden {% else %}{% endif %}">
-                                                            <span role="button" class="text-primary">...see all answers(${is_answered ? question.pin_answer.answer_count : 0})</span>
+                                                            <span role="button" class="text-primary">View/Add answers(${is_answered ? question.pin_answer.answer_count : 0})</span>
                                         </a>
                                         <br>
                                         <span class="text-secondary">Added by ${question.pin_answer.answer_by} on
@@ -298,7 +306,7 @@
                 let answer_list_div = $('.answer-list-div');
                 answer_list_div.html('')
                 if (data.length === 0){
-                    answer_list_div.append('<div class="list-group-item list-group-item-action pt-3 lh-sm shadow">No Answer Added Yet </div>')
+                    answer_list_div.append('<div class="shadow  py-5 text-center fw-bold">No answer added yet! </div>')
                 }
                 console.log("Successfully loaded answers", data)
                 data.forEach(function (answer, index) {
@@ -333,7 +341,7 @@
 
         answer_list_div.append(
             `
-                                <div class="list-group-item list-group-item-action pt-3 lh-sm shadow ${answer.id==answer_id_from_url ? 'border border-danger' : ''}">
+                                <div class="list-group-item list-group-item-action pt-3 mb-1 lh-sm shadow ${answer.id==answer_id_from_url ? 'border border-danger' : ''}">
                                     <div class="d-flex w-100 align-items-center justify-content-between">
                                         <strong class="small"><img src="${answer.created_by.image}" alt="New User" width="24" height="24"
                                                              class="rounded-circle me-1"> ${answer.created_by.first_name} ${answer.created_by.last_name}</strong>
@@ -437,6 +445,29 @@
             }
         })
     }
+
+    const loginSignupAjaxCall = (form_name, username, password, email) => {
+    $.ajax({
+        url: "{% url 'login-signup' %}",
+        method: 'POST',
+        data: {
+            username: username,
+            password: password,
+            email: email,
+            form_name: form_name,
+            csrfmiddlewaretoken: $("input[name=csrfmiddlewaretoken]").val()
+        },
+        success: function (data) {
+            toastr.success('Login Successfully', 'Success', {timeOut: 5000, closeButton: true})
+            console.log("Login Data ", data)
+            window.location.href = data['redirect_url']
+        },
+        error: function (error){
+            console.log("Error ", error)
+            toastr.error('Login Failed', 'Error', {timeOut: 5000, closeButton: true})
+        }
+    })
+}
 </script>
 </body>
 </html>

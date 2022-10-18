@@ -25,7 +25,7 @@
                 <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
                     {% if request.session.user_detail %}
                         <i class="bi bi-list fw-bold d-flex align-items-center fs-1 mx-4 mb-1" role="button" tabindex="0" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="offcanvasExample"></i>
-                    {% endif %} 
+                    {% endif %}
                     <a href="/"
                        class="d-flex align-items-center my-2 my-lg-0 me-lg-auto text-white text-decoration-none">
                         <h3> <i class="bi bi-columns-gap"></i> DreamView </h3>
@@ -47,6 +47,14 @@
                 </div>
             </div>
         </div>
+    {% if request.session.user_detail and not request.session.user_detail.is_verified %}
+        <div class="text-center bg-warning">
+             <small class="text-gray">You have not verified yourself, So you will not able to add question/answer.
+            <a href="{% url 'profile' %}" class="text-decoration-none">..more</a>
+            <i role="button" class="bi bi-x pull-right fs-5 px-2" onclick="$(this).parent().hide()"></i>
+            </small>
+        </div>
+    {% endif %}
     </header>
     <div class="container-1 flex-row">
             {% block left_menu %}
@@ -57,7 +65,9 @@
                           </span>
                         <a href="javascript:void(0)"
                            class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-                            <span class="fs-4">Rahul Gupta</span>
+                            <img src="{% if request.session.user_detail.image %} {{ request.session.user_detail.image }} {% else %} {% static 'bg/defaultProfile.png' %} {% endif %}" alt="" width="40" height="40"
+                                     class="rounded-circle me-2">
+                            <span class="fs-4">{{ request.session.user_detail.first_name }} {{ request.session.user_detail.last_name }}</span>
                         </a>
                         <hr>
                         <ul class="nav nav-pills flex-column mb-auto">
@@ -82,6 +92,14 @@
                             <li>
                                 <a href="{% url 'profile' %}"  class="nav-link text-white">
                                     Profile
+                                </a>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <a {% if request.session.user_detail.is_super_admin %} href="{% url 'admin-dashboard' %}" {% else %} disabled onclick="toastr.error('You dont have super admin access to view this page.', 'Access Denied')" {% endif %}  class="nav-link text-white">
+                                    Admin Panel
                                 </a>
                             </li>
                         </ul>
