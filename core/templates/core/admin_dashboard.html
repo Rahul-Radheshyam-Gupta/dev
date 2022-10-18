@@ -186,7 +186,7 @@
                 scrollX: true,
                 buttons: ['csv', 'pdf'],
                 ajax: {
-                    url: base_url + "core/get_profile/?format=datatables&keep=id,last_name,created_at,contact_number,image,user_name",
+                    url: base_url + "core/get_profile/?format=datatables&keep=id,last_name,created_at,contact_number,image,user_name,added_by_last_name",
                     type: 'GET',
                     data: function (d) {
                         d.status = $('#category_status').val()
