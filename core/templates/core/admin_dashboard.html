@@ -6,7 +6,7 @@
 
     </style>
     <div class="container">
-        <h6 class="my-3"> Manage members and their activities</h6>
+        <h6 class="my-3"> Manage your members and their activities</h6>
         <ul class="w-100 nav nav-pills mb-3 mt-2" id="pills-tab" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="pills-question-tab" data-bs-toggle="pill" data-bs-target="#pills-question"
@@ -53,6 +53,7 @@
                                         <th data-data="email">Contact Detail</th>
                                         <th data-data="is_verified">Verified?</th>
                                         <th data-data="is_super_admin">SuperAdmin?</th>
+                                        <th data-data="added_by_first_name">Added By</th>
                                         <th class="text-xs-center" data-data="is_super_admin" data-searchable="false"
                                             data-orderable="false">
                                             Action
@@ -166,7 +167,7 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary modal-cancel" data-bs-dismiss="modal">Close</button>
                     <button type="button" class="btn btn-primary" id="profileAddUpdateBtn">Update</button>
                 </div>
             </div>
@@ -216,9 +217,15 @@
                         }
                     },
                     {
-                        'targets': 4,
+                        'targets': 5,
                         'render': function (data, type, row) {
                             return `<span role="button" class="badge bg-primary edit" data-bs-toggle="modal" data-bs-target="#profileAddUpdateModal"> Update  </span>`;
+                        }
+                    },
+                    {
+                        'targets': 4,
+                        'render': function (data, type, row) {
+                            return !row.added_by_first_name ? 'Self' : row.added_by_first_name + ' ' + row.added_by_last_name;
                         }
                     }
                 ]
@@ -281,7 +288,7 @@
                 success:function (data){
                     console.log("Successfully Update profile ", data)
                     profile_table.ajax.reload();
-                    resetProfileAddUpdateModal();
+                    $('.modal-cancel').click();
                 },
                 error:function (error){
                     console.log("error in UpdateProfile ", error)
