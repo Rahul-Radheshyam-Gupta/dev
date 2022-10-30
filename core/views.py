@@ -9,8 +9,8 @@ from functools import wraps
 import os
 
 
-# base_url = 'http://localhost:8001/'
-base_url = 'https://backend95.pythonanywhere.com/'
+base_url = 'http://localhost:8001/'
+# base_url = 'https://backend95.pythonanywhere.com/'
 
 
 
