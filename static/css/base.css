@@ -1,0 +1,62 @@
+#editor {
+    height: 300px;
+}
+
+.h-100 {
+    height: 91vh !important;
+}
+
+.flex-row {
+    display: flex;
+    flex-direction: row;
+}
+.flex-col {
+        display: flex;
+        flex-direction:column!important;
+    }
+
+.btn, input, select, textarea {
+    outline: none !important;
+    box-shadow: none !important;
+}
+@media only screen and (max-width: 1000px) {
+    .flex-row {
+        display: flex;
+        flex-direction:column!important;
+    }
+    .login_signup_bg{
+        height: 100vh!important;
+    }
+    .profile_stats div{
+        border:none!important;
+        margin-bottom: 5px!important; ;
+    }
+
+}
+
+.infinite-scroller {
+    border: 1px solid #ced4da;
+    max-height: 90vh;
+    overflow: auto;
+}
+
+.sbt {
+    position: absolute;
+    end: 2%;
+    right: 2%;
+}
+
+.bg-purple {
+    background-color: #712cf9;
+    color: #fff;
+}
+.hidden{
+    display: none!important;
+}
+
+.pull-right{
+    float: right!important;
+}
+.zoom-on-hover:hover{
+    transform: scale(1.5);
+}
