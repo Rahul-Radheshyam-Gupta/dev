@@ -1,3 +1,3 @@
-web: gunicorn dev.wsgi --log-fle -
+web: gunicorn dev.wsgi
 manage.py migrate
 
