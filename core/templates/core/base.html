@@ -47,15 +47,17 @@
                 </div>
             </div>
         </div>
-    {% if request.session.user_detail and not request.session.user_detail.is_verified %}
-        <div class="text-center bg-warning">
-             <small class="text-gray">You have not verified yourself, So you will not able to add question/answer.
-            <a href="{% url 'profile' %}" class="text-decoration-none">..more</a>
-            <i role="button" class="bi bi-x pull-right fs-5 px-2" onclick="$(this).parent().hide()"></i>
-            </small>
-        </div>
-    {% endif %}
     </header>
+    {% if request.session.user_detail and not request.session.user_detail.is_verified %}
+            <div class="bg-warning">
+                <div class="flex-col text-center">
+                     <small class="text-gray mt-1">You have not verified yourself, So you will not able to add question/answer.
+                    <a href="{% url 'profile' %}" class="text-decoration-none">..more</a>
+                    <i role="button" class="bi bi-x pull-right fs-5 px-2" onclick="$(this).parent().hide()"></i>
+                    </small>
+                </div>
+            </div>
+    {% endif %}
     <div class="container-1 flex-row">
             {% block left_menu %}
                 <div id="sidebar" class="offcanvas offcanvas-start" style="width: 280px;height: 100vh;">

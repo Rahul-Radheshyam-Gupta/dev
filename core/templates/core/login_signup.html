@@ -44,6 +44,11 @@
         }
         {#<a href="https://www.flaticon.com/free-icons/user" title="user icons">User icons created by Freepik - Flaticon</a>#}
     </style>
+    <div class="custom-loader" style="position:absolute; top: 50%; left: 40%; z-index: 1;">
+        <div class="spinner-border text-success p-1" role="status"></div>
+        <div class="spinner-border text-success p-1" role="status"></div>
+        <div class="spinner-border text-success p-1" role="status"></div>
+    </div>
     <div class="flex-row w-100 login_signup_bg">
         <div class="text-lg-start container py-5 text-black welcome-div">
             <div class="container">
@@ -84,22 +89,23 @@
                 <div class="form-floating mb-2">
                     <input type="text" class="form-control h-25" id="username" name="username"
                            placeholder="Enter Unique User Name" required>
-                    <label for="username">User Name</label>
+                    <label for="username">User Name *</label>
                 </div>
                 <div class="form-floating mb-2">
                     <input type="email" class="form-control h-25" id="email"
+                           pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"
                            placeholder="Enter Email" required>
-                    <label for="email">Email Address</label>
+                    <label for="email">Email Address *</label>
                 </div>
                 <div class="form-floating mb-2">
                     <input type="password" name="password" class="form-control h-25" id="password"
                            placeholder="Password" required>
-                    <label for="password">Password</label>
+                    <label for="password">Password *</label>
                 </div>
                 <div class="form-floating mb-2">
                     <input type="password" name="new_password" class="form-control h-25" id="new_password"
                            placeholder="Repeat Same Password">
-                    <label for="new_password">Repeat Same Password</label>
+                    <label for="new_password">Repeat Same Password *</label>
                 </div>
                 <button class="w-100 btn btn-sm btn-primary mt-1 h-25" type="button" id="login_signup_btn">Login</button>
                 <hr class="">
@@ -112,6 +118,7 @@
 
 {% block script %}
 <script>
+$('.custom-loader').hide();
 $("#login_signup_btn").click(function (e) {
     e.preventDefault()
     let form_name = $('#form_help').prop('data-form-name');
@@ -119,8 +126,18 @@ $("#login_signup_btn").click(function (e) {
     let password = $('#password').val();
     let new_password = $('#new_password').val();
     let email = $('#email').val();
-    if (!password || password !== new_password && form_name === 'signup' ){
-        toastr.error('Password must matched', 'Error', {timeOut: 5000, closeButton: true})
+    if (!username || !password){
+        toastr.error('User name Or Password cant be empty', 'Error', {timeOut: 3000, closeButton: true})
+        return false;
+    }
+    if (!password && form_name === 'signup' || password !== new_password && form_name === 'signup' ){
+        toastr.error('Password must be same', 'Error', {timeOut: 3000, closeButton: true})
+        return false;
+    }
+
+    console.log(form_name, (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)))
+    if (form_name == 'signup' && !(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email))){
+        toastr.error('Invalid Email', 'Error', {timeOut: 3000, closeButton: true})
         return false;
     }
     loginSignupAjaxCall(form_name, username, password, email);

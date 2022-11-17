@@ -159,8 +159,8 @@
 
                         var top_stats = `
                                     <div class="d-flex w-100 individual-question-action-div align-items-center justify-content-between">
-                                        <strong class="small"><img src="${question.created_by.image}" alt="RK" width="24" height="24"
-                                                             class="rounded-circle me-1">${question.created_by.first_name} ${question.created_by.last_name}</strong>
+                                        <strong class="small"><img src="${question.created_by.image}" alt="${question.created_by.first_name}" width="24" height="24"
+                                                             class="rounded-circle me-1">${question.created_by.first_name ? question.created_by.first_name: question.created_by.user_name.toUpperCase()} ${question.created_by.last_name}</strong>
                                         <small class="text-muted" style="font-size:0.7rem;">
                                             <span role="button" class="border rounded-circle p-1 vote-btn up border-secondary" onclick="${up_vote_funct}" >${up_vote_count}<i class="bi bi-arrow-up"></i></span>
                                             <span role="button" class="border rounded-circle p-1 vote-btn down border-secondary" onclick="${down_vote_funct}">${down_vote_count}<i class="bi bi-arrow-down"></i></span>
@@ -216,11 +216,11 @@
         if (form_name === 'signup') {
             current_selector.prop('data-form-name', 'login');
             current_selector.text('New on DreamView ? Do sign up.');
-            $('#new_password').parent().hide();
+            $('#new_password, #email').parent().hide();
         } else {
             current_selector.text('Already have an account ? Do login.');
             current_selector.prop('data-form-name', 'signup');
-            $('#new_password').parent().show()
+            $('#new_password, #email').parent().show()
         }
         $('#login_signup_form_header').text(form_name === 'signup' ? 'Login' :  'Sign Up');
         $('#login_signup_btn').text(form_name === 'signup' ? 'Login' : 'Sign Up' );
@@ -343,7 +343,7 @@
             `
                                 <div class="list-group-item list-group-item-action pt-3 mb-1 lh-sm shadow ${answer.id==answer_id_from_url ? 'border border-danger' : ''}">
                                     <div class="d-flex w-100 align-items-center justify-content-between">
-                                        <strong class="small"><img src="${answer.created_by.image}" alt="New User" width="24" height="24"
+                                        <strong class="small"><img src="${answer.created_by.image}" alt="${answer.created_by.first_name}" width="24" height="24"
                                                              class="rounded-circle me-1"> ${answer.created_by.first_name} ${answer.created_by.last_name}</strong>
                                         <small class="text-muted">
                                             <span role="button" class="border rounded-circle p-1 vote-btn up" onclick="${up_vote_funct}">${up_vote_count}<i class="bi bi-arrow-up"></i></span>
@@ -447,26 +447,32 @@
     }
 
     const loginSignupAjaxCall = (form_name, username, password, email) => {
-    $.ajax({
-        url: "{% url 'login-signup' %}",
-        method: 'POST',
-        data: {
-            username: username,
-            password: password,
-            email: email,
-            form_name: form_name,
-            csrfmiddlewaretoken: $("input[name=csrfmiddlewaretoken]").val()
-        },
-        success: function (data) {
-            toastr.success('Login Successfully', 'Success', {timeOut: 5000, closeButton: true})
-            console.log("Login Data ", data)
-            window.location.href = data['redirect_url']
-        },
-        error: function (error){
-            console.log("Error ", error)
-            toastr.error('Login Failed', 'Error', {timeOut: 5000, closeButton: true})
-        }
-    })
+        $('.custom-loader').show();
+        $('#login_signup_btn').hide();
+        $.ajax({
+            url: "{% url 'login-signup' %}",
+            method: 'POST',
+            data: {
+                username: username,
+                password: password,
+                email: email,
+                form_name: form_name,
+                csrfmiddlewaretoken: $("input[name=csrfmiddlewaretoken]").val()
+            },
+            complete: function () {
+                $('.custom-loader').hide();
+                $('#login_signup_btn').show();
+            },
+            success: function (data) {
+                toastr.success('Login Successfully', 'Success', {timeOut: 5000, closeButton: true})
+                console.log("Login Data ", data)
+                window.location.href = data['redirect_url']
+            },
+            error: function (error) {
+                console.log("Error ", error)
+                toastr.error('Login Failed', 'Error', {timeOut: 5000, closeButton: true})
+            }
+        })
 }
 </script>
 </body>
